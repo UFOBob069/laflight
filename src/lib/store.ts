@@ -40,10 +40,10 @@ export async function saveDeals(items: Array<any>) {
   } catch (error) {
     console.error('🔥 Error in saveDeals:', error);
     console.error('🔥 Error details:', {
-      name: error.name,
-      message: error.message,
-      code: error.code,
-      stack: error.stack
+      name: (error as any).name,
+      message: (error as any).message,
+      code: (error as any).code,
+      stack: (error as any).stack
     });
     throw error;
   }

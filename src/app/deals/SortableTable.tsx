@@ -36,7 +36,7 @@ export default function SortableTable({ deals, airportCodes }: { deals: Deal[]; 
   const handleSort = (key: keyof Deal) => {
     console.log('Sorting by:', key, 'Current config:', sortConfig);
     setSortConfig(prev => {
-      const newConfig = {
+      const newConfig: SortConfig = {
         key,
         direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
       };

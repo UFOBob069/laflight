@@ -23,7 +23,7 @@ function maybeDecodeQuotedPrintable(input: string): string {
   const looksQP = /=3D|=\r?\n/.test(input);
   if (!looksQP) return input;
   try {
-    const buf = qp.decode(input);             // Buffer
+    const buf = qp.decode(input) as unknown as Buffer;   // Cast to Buffer
     return iconv.decode(buf, 'utf-8');
   } catch {
     return input;
@@ -48,12 +48,15 @@ function cleanPriceToNumber(txt?: string): number | undefined {
 }
 
 // 1) Find the outer "card" container that wraps date+price, view button, and flight row
-function getCardContainer($: cheerio.CheerioAPI, dateTd: cheerio.Element): cheerio.Cheerio<cheerio.Element> {
+function getCardContainer($: cheerio.CheerioAPI, dateTd: cheerio.Element): any {
   const $date = $(dateTd);
 
   // Prefer nearest ancestor <table> whose class includes "broadIntentMarketContentDiscountedMdp"
   const $tables = $date.parents('table');
-  const $containerByClass = $tables.filter((_, t) => (t.attribs?.class || '').includes('broadIntentMarketContentDiscountedMdp')).first();
+  const $containerByClass = $tables.filter((_, t) => {
+    const element = t as any;
+    return (element.attribs?.class || '').includes('broadIntentMarketContentDiscountedMdp');
+  }).first();
   if ($containerByClass.length) return $containerByClass;
 
   // Fallback: climb to the TR that contains the left TD (date/price) and the right TD (View),
@@ -100,7 +103,7 @@ function findPriceNearDate(
   const $container = getCardContainer($, dateTd);
 
   // Prefer an explicit "price" span inside this card
-  const $priceSpan = $container.find('span[class*="price"]').filter((_, el) => /\$\d/.test($(el).text())).first();
+  const $priceSpan = $container.find('span[class*="price"]').filter((_: any, el: any) => /\$\d/.test($(el).text())).first();
   if ($priceSpan.length) {
     const raw = ($priceSpan.text() || '').replace(/\s+/g, ' ').trim();     // e.g., "From $618"
     const m = raw.match(/\$([\d,]+)/);
@@ -138,7 +141,7 @@ function findFlightRowAfterDate($: cheerio.CheerioAPI, dateTd: cheerio.Element) 
   if ($row.length) return $row;
 
   // Secondary: any row within container that looks like "Airline · Nonstop · LAX–BCN · 12 hr"
-  $row = $container.find('tr').filter((_, tr) => {
+  $row = $container.find('tr').filter((_: any, tr: any) => {
     const t = ($(tr).text() || '').replace(/\s+/g, ' ');
     return /·/.test(t) && /[A-Z]{3}\s*[–-]\s*[A-Z]{3}/.test(t);
   }).first();
@@ -271,7 +274,7 @@ export function parseDealEmail(subject: string, html?: string, text?: string): D
 
     dateRows.each((_, dateTd) => {
       try {
-        const deal = extractDealFromDateRow($, dateTd, subjectOrigin, subjectDestination);
+        const deal = extractDealFromDateRow($ as any, dateTd, subjectOrigin, subjectDestination);
 
         // Validate (and keep EVERYTHING). If origin/dest are still empty, set to UNK.
         const safeDeal = Deal.parse({
@@ -287,7 +290,7 @@ export function parseDealEmail(subject: string, html?: string, text?: string): D
         const fallback: DealT = {
           origin: subjectOrigin || 'UNK',
           destination: subjectDestination || 'UNK',
-          dates: getText($, dateTd),
+          dates: getText($ as any, dateTd),
           currency: 'USD',
           link: ''
         };
@@ -299,7 +302,7 @@ export function parseDealEmail(subject: string, html?: string, text?: string): D
     // Lightweight text fallback (keeps options but less structured)
     const t = text;
     const datePattern = /([A-Z][a-z]{2},?\s+[A-Z][a-z]{2}\s+\d{1,2})\s*[–-]\s*([A-Z][a-z]{2},?\s+[A-Z][a-z]{2}\s+\d{1,2})/g;
-    const matches = [...t.matchAll(datePattern)];
+    const matches = Array.from(t.matchAll(datePattern));
     for (const m of matches) {
       const dates = `${m[1]} – ${m[2]}`;
       const after = t.slice((m.index ?? 0) + m[0].length);
