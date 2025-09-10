@@ -89,8 +89,8 @@ export async function getTopDeals({ limit = 50, days = 7 } = {}) {
       
       // Sort by price and limit
       const sortedDeals = recentDeals
-        .filter(deal => deal.price) // Only deals with prices
-        .sort((a, b) => (a.price || 0) - (b.price || 0))
+        .filter((deal: any) => deal.price) // Only deals with prices
+        .sort((a: any, b: any) => (a.price || 0) - (b.price || 0))
         .slice(0, limit);
       
       console.log('Final deals returned:', sortedDeals.length);
