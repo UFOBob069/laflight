@@ -79,7 +79,7 @@ export async function getTopDeals({ limit = 50, days = 7 } = {}) {
       console.log('Total deals fetched:', allDeals.length);
       
       // Filter by date in memory (use receivedAt if available, fallback to createdAt)
-      const recentDeals = allDeals.filter(deal => {
+      const recentDeals = allDeals.filter((deal: any) => {
         const dealDate = new Date(deal.receivedAt || deal.createdAt);
         const cutoffDate = new Date(since);
         return dealDate >= cutoffDate;
