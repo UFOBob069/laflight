@@ -55,28 +55,49 @@ export async function getTopDeals({ limit = 50, days = 7 } = {}) {
     const since = dayjs().subtract(days, 'day').toISOString();
     console.log('Fetching deals since:', since);
     
-    const snap = await db.collection('deals')
-      .where('createdAt', '>=', since)
-      .orderBy('price', 'asc')
-      .limit(limit)
-      .get();
-    
-    const deals = snap.docs.map((d: any) => d.data());
-    console.log('Found deals:', deals.length);
-    return deals;
-  } catch (error) {
-    console.error('Error in getTopDeals:', error);
-    // Fallback: get all deals without date filter if the query fails
+    // First try the compound query (requires index)
     try {
-      const db = getFirestoreDB();
       const snap = await db.collection('deals')
-        .orderBy('createdAt', 'desc')
+        .where('createdAt', '>=', since)
+        .orderBy('price', 'asc')
         .limit(limit)
         .get();
-      return snap.docs.map((d: any) => d.data());
-    } catch (fallbackError) {
-      console.error('Fallback query also failed:', fallbackError);
-      return [];
+      
+      const deals = snap.docs.map((d: any) => d.data());
+      console.log('Found deals with compound query:', deals.length);
+      return deals;
+    } catch (indexError) {
+      console.log('Compound query failed (missing index), trying simple query...');
+      
+      // Fallback: get all deals and filter in memory
+      const snap = await db.collection('deals')
+        .orderBy('createdAt', 'desc')
+        .limit(limit * 3) // Get more to account for filtering
+        .get();
+      
+      const allDeals = snap.docs.map((d: any) => d.data());
+      console.log('Total deals fetched:', allDeals.length);
+      
+      // Filter by date in memory
+      const recentDeals = allDeals.filter(deal => {
+        const dealDate = new Date(deal.createdAt);
+        const cutoffDate = new Date(since);
+        return dealDate >= cutoffDate;
+      });
+      
+      console.log('Deals after date filtering:', recentDeals.length);
+      
+      // Sort by price and limit
+      const sortedDeals = recentDeals
+        .filter(deal => deal.price) // Only deals with prices
+        .sort((a, b) => (a.price || 0) - (b.price || 0))
+        .slice(0, limit);
+      
+      console.log('Final deals returned:', sortedDeals.length);
+      return sortedDeals;
     }
+  } catch (error) {
+    console.error('Error in getTopDeals:', error);
+    return [];
   }
 }
