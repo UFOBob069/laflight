@@ -55,10 +55,10 @@ export async function getTopDeals({ limit = 50, days = 7 } = {}) {
     const since = dayjs().subtract(days, 'day').toISOString();
     console.log('Fetching deals since:', since);
     
-    // First try the compound query (requires index)
+    // First try the compound query (requires index) - use receivedAt for email date
     try {
       const snap = await db.collection('deals')
-        .where('createdAt', '>=', since)
+        .where('receivedAt', '>=', since)
         .orderBy('price', 'asc')
         .limit(limit)
         .get();
@@ -71,16 +71,16 @@ export async function getTopDeals({ limit = 50, days = 7 } = {}) {
       
       // Fallback: get all deals and filter in memory
       const snap = await db.collection('deals')
-        .orderBy('createdAt', 'desc')
+        .orderBy('receivedAt', 'desc')
         .limit(limit * 3) // Get more to account for filtering
         .get();
       
       const allDeals = snap.docs.map((d: any) => d.data());
       console.log('Total deals fetched:', allDeals.length);
       
-      // Filter by date in memory
+      // Filter by date in memory (use receivedAt if available, fallback to createdAt)
       const recentDeals = allDeals.filter(deal => {
-        const dealDate = new Date(deal.createdAt);
+        const dealDate = new Date(deal.receivedAt || deal.createdAt);
         const cutoffDate = new Date(since);
         return dealDate >= cutoffDate;
       });
