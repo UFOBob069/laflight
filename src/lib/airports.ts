@@ -1,6 +1,3 @@
-import fs from 'fs';
-import path from 'path';
-
 interface AirportCode {
   code: string;
   city: string;
@@ -9,28 +6,17 @@ interface AirportCode {
 
 let airportCodes: Map<string, AirportCode> | null = null;
 
-export function loadAirportCodes(): Map<string, AirportCode> {
+export async function loadAirportCodes(): Promise<Map<string, AirportCode>> {
   if (airportCodes) return airportCodes;
 
   try {
-    const csvPath = path.join(process.cwd(), 'data', 'airport-codes.csv');
-    const csvContent = fs.readFileSync(csvPath, 'utf-8');
+    const response = await fetch('/api/airports');
+    const data = await response.json();
     
     airportCodes = new Map();
     
-    const lines = csvContent.split('\n');
-    for (let i = 1; i < lines.length; i++) { // Skip header
-      const line = lines[i].trim();
-      if (!line) continue;
-      
-      const [code, city, country] = line.split(',');
-      if (code && city && country) {
-        airportCodes.set(code.trim(), {
-          code: code.trim(),
-          city: city.trim(),
-          country: country.trim()
-        });
-      }
+    for (const [code, info] of Object.entries(data.airportCodes)) {
+      airportCodes.set(code, info as AirportCode);
     }
     
     console.log(`📍 Loaded ${airportCodes.size} airport codes`);
@@ -41,13 +27,13 @@ export function loadAirportCodes(): Map<string, AirportCode> {
   }
 }
 
-export function getAirportInfo(code: string): AirportCode | null {
-  const codes = loadAirportCodes();
+export async function getAirportInfo(code: string): Promise<AirportCode | null> {
+  const codes = await loadAirportCodes();
   return codes.get(code) || null;
 }
 
-export function getCityName(code: string): string {
-  const info = getAirportInfo(code);
+export async function getCityName(code: string): Promise<string> {
+  const info = await getAirportInfo(code);
   return info ? `${info.city}, ${info.country}` : code;
 }
 

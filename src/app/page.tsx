@@ -5,17 +5,37 @@ import { useState } from 'react';
 export default function HomePage() {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsSubmitted(true);
-    setIsSubmitting(false);
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email,
+          source: 'homepage'
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Redirect to deals page after successful subscription
+        window.location.href = '/deals';
+      } else {
+        throw new Error(result.error || 'Subscription failed');
+      }
+    } catch (error) {
+      console.error('Subscription error:', error);
+      alert('Failed to subscribe. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -55,11 +75,6 @@ export default function HomePage() {
                 </button>
               </form>
               
-              {isSubmitted && (
-                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-green-800 font-medium">✅ Check your email for your first deal!</p>
-                </div>
-              )}
             </div>
 
             {/* Social Proof */}

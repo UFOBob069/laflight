@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTopDeals } from '@/lib/store';
 import { sendDigestEmail } from '@/lib/email';
+import { getFirestoreDB } from '@/lib/firebaseAdmin';
 
 export async function POST(req: NextRequest) {
   const secret = req.headers.get('x-cron-secret');
@@ -19,15 +20,68 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const result = await sendDigestEmail({
-      to: to || process.env.EMAIL_TO!,
-      deals
-    });
+    // If specific email provided, send to that email
+    if (to) {
+      const result = await sendDigestEmail({
+        to,
+        deals,
+        isPaid: false // Default to free for manual sends
+      });
+
+      return NextResponse.json({ 
+        sent: true, 
+        count: deals.length,
+        emailId: result.data?.id
+      });
+    }
+
+    // Send to all subscribers
+    const db = getFirestoreDB();
+    const subscribers = await db.collection('subscribers')
+      .where('status', '==', 'active')
+      .get();
+
+    if (subscribers.empty) {
+      return NextResponse.json({ 
+        message: 'No active subscribers found',
+        count: 0
+      });
+    }
+
+    const results = [];
+    for (const doc of subscribers.docs) {
+      const subscriber = doc.data();
+      try {
+        const result = await sendDigestEmail({
+          to: subscriber.email,
+          deals,
+          isPaid: subscriber.isPaid || false
+        });
+
+        // Update last digest sent timestamp
+        await doc.ref.update({
+          lastDigestSent: new Date().toISOString()
+        });
+
+        results.push({
+          email: subscriber.email,
+          isPaid: subscriber.isPaid || false,
+          emailId: result.data?.id
+        });
+      } catch (error) {
+        console.error(`Failed to send digest to ${subscriber.email}:`, error);
+        results.push({
+          email: subscriber.email,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    }
 
     return NextResponse.json({ 
       sent: true, 
       count: deals.length,
-      emailId: result.data?.id
+      subscribers: results.length,
+      results
     });
   } catch (error) {
     console.error('Digest error:', error);

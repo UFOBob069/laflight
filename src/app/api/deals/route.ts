@@ -1,12 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getTopDeals } from '@/lib/store';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const deals = await getTopDeals({ limit: 50, days: 7 });
+    
     return NextResponse.json({ 
-      deals, 
-      updatedAt: new Date().toISOString(),
+      deals,
       count: deals.length
     });
   } catch (error) {
