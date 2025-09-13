@@ -11,9 +11,18 @@ const checkoutSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    console.log('Checkout session request body:', body);
+    
+    // Check environment variables
+    console.log('STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
+    console.log('STRIPE_PRICE_ID:', process.env.STRIPE_PRICE_ID);
+    console.log('SITE_URL:', process.env.SITE_URL);
+    
     const { email, customerId } = checkoutSchema.parse(body);
+    console.log('Parsed email:', email, 'customerId:', customerId);
 
     const baseUrl = process.env.SITE_URL || 'http://localhost:3000';
+    console.log('Base URL:', baseUrl);
     
     const session = await createCheckoutSession({
       email,
@@ -21,6 +30,8 @@ export async function POST(req: NextRequest) {
       successUrl: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/deals`,
     });
+
+    console.log('Checkout session created successfully:', session.id);
 
     return NextResponse.json({ 
       sessionId: session.id,
@@ -31,6 +42,7 @@ export async function POST(req: NextRequest) {
     console.error('Checkout session error:', error);
     
     if (error instanceof z.ZodError) {
+      console.error('Validation error:', error.errors);
       return NextResponse.json({ 
         error: 'Invalid email address',
         details: error.errors[0].message

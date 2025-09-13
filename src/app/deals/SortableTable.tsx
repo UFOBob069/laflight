@@ -50,13 +50,11 @@ export default function SortableTable({
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'price', direction: 'asc' });
 
   const handleSort = (key: keyof Deal) => {
-    console.log('Sorting by:', key, 'Current config:', sortConfig);
     setSortConfig(prev => {
       const newConfig: SortConfig = {
         key,
         direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
       };
-      console.log('New sort config:', newConfig);
       return newConfig;
     });
   };
@@ -88,7 +86,6 @@ export default function SortableTable({
 
     if (typeof aVal === 'number' && typeof bVal === 'number') {
       const result = sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
-      console.log(`Comparing ${aVal} vs ${bVal}, direction: ${sortConfig.direction}, result: ${result}`);
       return result;
     }
 

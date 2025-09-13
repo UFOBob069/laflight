@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomePage() {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user, subscription, loading: authLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,24 +59,52 @@ export default function HomePage() {
 
             {/* CTA First-Person Psychology */}
             <div className="max-w-md mx-auto mb-12">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter my email for free deals"
-                  className="w-full px-6 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-blue-600 text-white px-8 py-4 text-lg font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                >
-                  {isSubmitting ? 'Getting My Deals...' : 'Get My Free Flight Deals'}
-                </button>
-              </form>
-              
+              {user ? (
+                // Logged in user - show deals button
+                <div className="space-y-4">
+                  <div className="text-center mb-6">
+                    <p className="text-lg text-gray-600 mb-2">
+                      Welcome back, <strong>{user.email}</strong>!
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {subscription?.isPaid ? 'Premium Member' : 'Free Account'}
+                    </p>
+                  </div>
+                  <a
+                    href="/deals"
+                    className="w-full bg-blue-600 text-white px-8 py-4 text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors text-center block"
+                  >
+                    View Latest Flight Deals
+                  </a>
+                  {!subscription?.isPaid && (
+                    <a
+                      href="/pricing"
+                      className="w-full bg-yellow-600 text-white px-8 py-3 text-lg font-semibold rounded-lg hover:bg-yellow-700 transition-colors text-center block"
+                    >
+                      Upgrade to Premium - $20/year
+                    </a>
+                  )}
+                </div>
+              ) : (
+                // Not logged in - show email form
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter my email for free deals"
+                    className="w-full px-6 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-blue-600 text-white px-8 py-4 text-lg font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  >
+                    {isSubmitting ? 'Getting My Deals...' : 'Get My Free Flight Deals'}
+                  </button>
+                </form>
+              )}
             </div>
 
             {/* Social Proof */}
@@ -187,23 +217,42 @@ export default function HomePage() {
             <div className="text-lg mb-4">per year</div>
             <div className="text-sm text-gray-500 mb-6">Less than $2/month</div>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter my email to get started"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-blue-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {isSubmitting ? 'Getting Started...' : 'Get Started - $20/year'}
-              </button>
-            </form>
+            {user ? (
+              <div className="space-y-4">
+                <a
+                  href="/deals"
+                  className="w-full bg-blue-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-blue-700 text-center block"
+                >
+                  View Latest Deals
+                </a>
+                {!subscription?.isPaid && (
+                  <a
+                    href="/pricing"
+                    className="w-full bg-yellow-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-yellow-700 text-center block"
+                  >
+                    Upgrade to Premium - $20/year
+                  </a>
+                )}
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter my email to get started"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-blue-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Getting Started...' : 'Get Started - $20/year'}
+                </button>
+              </form>
+            )}
             
             <p className="text-xs text-gray-500 mt-4">Cancel anytime. No hidden fees.</p>
           </div>
@@ -269,25 +318,44 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold mb-4">Ready to Stop Overpaying?</h2>
           <p className="text-xl mb-8">Join thousands of smart travelers saving money on every trip</p>
           
-          <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-            <div className="flex gap-2">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter my email"
-                className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-semibold"
+          {user ? (
+            <div className="max-w-md mx-auto space-y-3">
+              <a
+                href="/deals"
+                className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold text-center block"
               >
-                {isSubmitting ? 'Starting...' : 'Get Started'}
-              </button>
+                View Latest Deals
+              </a>
+              {!subscription?.isPaid && (
+                <a
+                  href="/pricing"
+                  className="w-full bg-yellow-600 text-white px-6 py-3 rounded-lg hover:bg-yellow-700 font-semibold text-center block"
+                >
+                  Upgrade to Premium - $20/year
+                </a>
+              )}
             </div>
-          </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter my email"
+                  className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 font-semibold"
+                >
+                  {isSubmitting ? 'Starting...' : 'Get Started'}
+                </button>
+              </div>
+            </form>
+          )}
           
           <p className="text-sm text-gray-400 mt-4">$20/year • Cancel anytime • No spam</p>
         </div>

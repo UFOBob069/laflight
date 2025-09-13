@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Confetti from 'react-confetti';
 
 function AuthContent() {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,6 +11,8 @@ function AuthContent() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 });
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -25,6 +28,20 @@ function AuthContent() {
       setIsLogin(false);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    // Set window dimensions for confetti
+    const updateDimensions = () => {
+      setWindowDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
   
   const { signIn, signUp } = useAuth();
   const router = useRouter();
@@ -40,13 +57,24 @@ function AuthContent() {
         router.push('/deals');
       } else {
         await signUp(email, password);
-        // Check if this is an upgrade flow
-        const upgradeParam = searchParams.get('upgrade');
-        if (upgradeParam === 'true') {
-          router.push('/pricing');
-        } else {
-          router.push('/deals');
-        }
+        
+        // Show confetti for successful signup
+        setShowConfetti(true);
+        
+        // Hide confetti after 3 seconds
+        setTimeout(() => {
+          setShowConfetti(false);
+        }, 3000);
+        
+        // Redirect after a short delay to let confetti show
+        setTimeout(() => {
+          const upgradeParam = searchParams.get('upgrade');
+          if (upgradeParam === 'true') {
+            router.push('/pricing');
+          } else {
+            router.push('/deals');
+          }
+        }, 1500);
       }
     } catch (error: any) {
       setError(error.message || 'Authentication failed');
@@ -57,6 +85,28 @@ function AuthContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Confetti Animation */}
+      {showConfetti && (
+        <>
+          <Confetti
+            width={windowDimensions.width}
+            height={windowDimensions.height}
+            recycle={false}
+            numberOfPieces={200}
+            gravity={0.3}
+            initialVelocityY={20}
+            colors={['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']}
+          />
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-8 shadow-2xl text-center animate-pulse">
+              <div className="text-6xl mb-4">🎉</div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Aboard!</h2>
+              <p className="text-lg text-gray-600">Your account has been created successfully!</p>
+            </div>
+          </div>
+        </>
+      )}
+      
       {/* Travel-themed background elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating airplane */}
