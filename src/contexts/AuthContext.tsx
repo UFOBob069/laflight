@@ -66,14 +66,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     if (!auth) {
-      throw new Error('Firebase Auth is not configured');
+      throw new Error('Firebase Auth is not configured. Please contact support or check your environment variables.');
     }
     await signInWithEmailAndPassword(auth, email, password);
   };
 
   const signUp = async (email: string, password: string) => {
     if (!auth) {
-      throw new Error('Firebase Auth is not configured');
+      throw new Error('Firebase Auth is not configured. Please contact support or check your environment variables.');
     }
     await createUserWithEmailAndPassword(auth, email, password);
   };

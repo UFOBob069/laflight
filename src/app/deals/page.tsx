@@ -20,6 +20,7 @@ function DealsContent() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [airportCodes, setAirportCodes] = useState<Map<string, any>>(new Map());
+  const [isUpgrading, setIsUpgrading] = useState(false);
 
   useEffect(() => {
     const fetchDeals = async () => {
@@ -45,6 +46,40 @@ function DealsContent() {
     loadCodes();
   }, []);
 
+  const handleUpgrade = async () => {
+    if (!user?.email) {
+      alert('Please sign in to upgrade');
+      return;
+    }
+
+    setIsUpgrading(true);
+    
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email: user.email,
+          customerId: subscription?.stripeCustomerId // Use existing customer ID if available
+        }),
+      });
+
+      const { url } = await response.json();
+      
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error('Failed to create checkout session');
+      }
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      alert('Failed to start upgrade process. Please try again.');
+    } finally {
+      setIsUpgrading(false);
+    }
+  };
 
   if (loading || authLoading) {
     return (
@@ -108,12 +143,13 @@ function DealsContent() {
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               {!isPaid && (
-                <a
-                  href="/pricing"
-                  className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium text-center"
+                <button
+                  onClick={handleUpgrade}
+                  disabled={isUpgrading}
+                  className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 disabled:opacity-50 transition-colors text-sm font-medium text-center"
                 >
-                  Upgrade to Premium - $20/year
-                </a>
+                  {isUpgrading ? 'Processing...' : 'Upgrade to Premium - $20/year'}
+                </button>
               )}
               <a
                 href="/account"
@@ -126,7 +162,7 @@ function DealsContent() {
           {!isPaid && (
             <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
               <p className="text-sm text-yellow-800">
-                You're seeing only the lowest priced deals. You're missing out on <strong>{deals.length - 5} more deals</strong> with bigger discounts! 
+                You're seeing only the lowest priced deals. {deals.length > 5 ? `You're missing out on ${deals.length - 5} more deals with bigger discounts! ` : 'Upgrade to see all deals with sorting and filtering! '}
                 <a href="/pricing" className="underline hover:no-underline ml-1">Upgrade to see ALL {deals.length} deals and sort them.</a>
               </p>
             </div>
@@ -145,6 +181,8 @@ function DealsContent() {
           allowSorting={isPaid}
           showUpgradePrompt={!isPaid}
           isAuthenticated={!!user}
+          totalDeals={deals.length}
+          onUpgrade={user ? handleUpgrade : undefined}
         />
       </Suspense>
     </main>

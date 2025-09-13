@@ -1,64 +1,87 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState({ status: '', progress: 0, total: 0, completed: false });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
+  const { user, loading: authLoading } = useAuth();
+
+  // List of admin email addresses
+  const adminEmails = [
+    'david.eagan@gmail.com', // Admin email
+    'admin@bestlaxdeals.com', // Add any other admin emails
+  ];
 
   useEffect(() => {
-    // Check if already authenticated
-    const adminAuth = localStorage.getItem('adminAuth');
-    if (adminAuth === 'true') {
+    if (user && adminEmails.includes(user.email || '')) {
       setIsAuthenticated(true);
-    }
-  }, []);
-
-  const handleAuth = (e: React.FormEvent) => {
-    e.preventDefault();
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123';
-    
-    if (password === adminPassword) {
-      setIsAuthenticated(true);
-      localStorage.setItem('adminAuth', 'true');
       setAuthError('');
-    } else {
-      setAuthError('Invalid password');
+    } else if (user && !adminEmails.includes(user.email || '')) {
+      setAuthError('Access denied. This email is not authorized for admin access.');
     }
-  };
+  }, [user]);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">Admin Login</h1>
-          <form onSubmit={handleAuth} className="space-y-4">
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Admin Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+          <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">Admin Access Required</h1>
+          
+          {!user ? (
+            <div className="space-y-4">
+              <p className="text-gray-600 text-center mb-6">
+                Please sign in with an authorized admin account to access the admin dashboard.
+              </p>
+              <div className="space-y-3">
+                <a
+                  href="/auth?signup=true"
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center block"
+                >
+                  Sign Up
+                </a>
+                <a
+                  href="/auth"
+                  className="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 text-center block"
+                >
+                  Sign In
+                </a>
+              </div>
             </div>
-            {authError && (
-              <p className="text-red-600 text-sm">{authError}</p>
-            )}
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Login
-            </button>
-          </form>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-gray-600 text-center mb-6">
+                Signed in as: <strong>{user.email}</strong>
+              </p>
+              {authError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-600 text-sm text-center">{authError}</p>
+                </div>
+              )}
+              <div className="text-center">
+                <a
+                  href="/deals"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  Go to Deals Page
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -140,21 +163,19 @@ export default function AdminPage() {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('adminAuth');
-    setIsAuthenticated(false);
-  };
-
   return (
     <main className="max-w-4xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-        <button
-          onClick={logout}
-          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p className="text-sm text-gray-600">Signed in as: {user?.email}</p>
+        </div>
+        <a
+          href="/deals"
+          className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
         >
-          Logout
-        </button>
+          Back to Deals
+        </a>
       </div>
       <div className="mb-8">
         <p className="text-gray-600">Manage your flight deals system</p>

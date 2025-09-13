@@ -5,19 +5,21 @@ import { z } from 'zod';
 
 const checkoutSchema = z.object({
   email: z.string().email('Invalid email address'),
+  customerId: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email } = checkoutSchema.parse(body);
+    const { email, customerId } = checkoutSchema.parse(body);
 
     const baseUrl = process.env.SITE_URL || 'http://localhost:3000';
     
     const session = await createCheckoutSession({
       email,
+      customerId,
       successUrl: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${baseUrl}/pricing`,
+      cancelUrl: `${baseUrl}/deals`,
     });
 
     return NextResponse.json({ 

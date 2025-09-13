@@ -35,13 +35,17 @@ export default function SortableTable({
   airportCodes, 
   allowSorting = true, 
   showUpgradePrompt = false,
-  isAuthenticated = false
+  isAuthenticated = false,
+  totalDeals = 0,
+  onUpgrade
 }: { 
   deals: Deal[]; 
   airportCodes: Map<string, AirportCode>;
   allowSorting?: boolean;
   showUpgradePrompt?: boolean;
   isAuthenticated?: boolean;
+  totalDeals?: number;
+  onUpgrade?: () => void;
 }) {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'price', direction: 'asc' });
 
@@ -301,17 +305,26 @@ export default function SortableTable({
       {showUpgradePrompt && (
         <div className="mt-4 sm:mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 sm:p-6 text-center">
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
-            You're missing out on {deals.length - 5} more deals!
+            {totalDeals > 5 ? `You're missing out on ${totalDeals - 5} more deals!` : 'Unlock Premium features!'}
           </h3>
           <p className="text-sm sm:text-base text-gray-600 mb-4">
-            Upgrade to Premium to see ALL {deals.length} deals including the biggest discounts, plus sorting and filtering features.
+            Upgrade to Premium to see ALL {totalDeals} deals including the biggest discounts, plus sorting and filtering features.
           </p>
-          <a
-            href="/pricing"
-            className="bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold inline-block text-sm sm:text-base"
-          >
-            Upgrade to Premium - $20/year
-          </a>
+          {onUpgrade ? (
+            <button
+              onClick={onUpgrade}
+              className="bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-sm sm:text-base"
+            >
+              Upgrade to Premium - $20/year
+            </button>
+          ) : (
+            <a
+              href="/pricing"
+              className="bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold inline-block text-sm sm:text-base"
+            >
+              Upgrade to Premium - $20/year
+            </a>
+          )}
         </div>
       )}
     </div>

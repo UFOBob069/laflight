@@ -14,11 +14,13 @@ export async function createCheckoutSession({
   priceId = PRICE_ID,
   successUrl,
   cancelUrl,
+  customerId,
 }: {
   email: string;
   priceId?: string;
   successUrl: string;
   cancelUrl: string;
+  customerId?: string;
 }) {
   if (!stripe) {
     throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');
@@ -33,7 +35,7 @@ export async function createCheckoutSession({
         quantity: 1,
       },
     ],
-    customer_email: email,
+    ...(customerId ? { customer: customerId } : { customer_email: email }),
     success_url: successUrl,
     cancel_url: cancelUrl,
     metadata: {
