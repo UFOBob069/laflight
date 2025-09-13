@@ -25,8 +25,8 @@ export default function HomePage() {
       const result = await response.json();
       
       if (result.success) {
-        // Redirect to deals page after successful subscription
-        window.location.href = '/deals';
+        // Redirect to auth page to create account
+        window.location.href = '/auth?email=' + encodeURIComponent(email) + '&signup=true';
       } else {
         throw new Error(result.error || 'Subscription failed');
       }

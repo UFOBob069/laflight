@@ -11,30 +11,8 @@ export default function PricingPage() {
       return;
     }
 
-    setIsLoading(true);
-    
-    try {
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const { url } = await response.json();
-      
-      if (url) {
-        window.location.href = url;
-      } else {
-        throw new Error('Failed to create checkout session');
-      }
-    } catch (error) {
-      console.error('Upgrade error:', error);
-      alert('Failed to start upgrade process. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+    // Redirect to auth page to create account first, then upgrade
+    window.location.href = '/auth?email=' + encodeURIComponent(email) + '&signup=true&upgrade=true';
   };
 
   return (
@@ -129,6 +107,12 @@ export default function PricingPage() {
                 <svg className="w-5 h-5 text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
+                <strong>🌍 International destinations included</strong>
+              </li>
+              <li className="flex items-center">
+                <svg className="w-5 h-5 text-green-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
                 Direct booking links
               </li>
               <li className="flex items-center">
@@ -170,6 +154,7 @@ export default function PricingPage() {
                   <th className="text-left py-4 px-4 font-semibold text-gray-900">Service</th>
                   <th className="text-center py-4 px-4 font-semibold text-gray-900">Price/Year</th>
                   <th className="text-center py-4 px-4 font-semibold text-gray-900">Deals/Week</th>
+                  <th className="text-center py-4 px-4 font-semibold text-gray-900">International</th>
                   <th className="text-center py-4 px-4 font-semibold text-gray-900">Booking Links</th>
                 </tr>
               </thead>
@@ -178,18 +163,21 @@ export default function PricingPage() {
                   <td className="py-4 px-4 font-semibold text-blue-900">Best LAX Deals (US)</td>
                   <td className="py-4 px-4 text-center font-bold text-green-600">$20</td>
                   <td className="py-4 px-4 text-center">All deals found globally</td>
+                  <td className="py-4 px-4 text-center">✅ <strong>Yes</strong></td>
                   <td className="py-4 px-4 text-center">✅ Yes</td>
                 </tr>
                 <tr>
                   <td className="py-4 px-4">Going.com</td>
                   <td className="py-4 px-4 text-center text-red-600 font-semibold">$70</td>
                   <td className="py-4 px-4 text-center">~20</td>
+                  <td className="py-4 px-4 text-center">❌ Limited</td>
                   <td className="py-4 px-4 text-center">✅ Yes</td>
                 </tr>
                 <tr>
                   <td className="py-4 px-4">Thrifty Traveler</td>
                   <td className="py-4 px-4 text-center text-red-600 font-semibold">$199</td>
                   <td className="py-4 px-4 text-center">~15</td>
+                  <td className="py-4 px-4 text-center">❌ US Only</td>
                   <td className="py-4 px-4 text-center">✅ Yes</td>
                 </tr>
               </tbody>
@@ -199,7 +187,7 @@ export default function PricingPage() {
           <div className="mt-8 text-center">
             <p className="text-lg text-gray-700 mb-4">
               <strong>You save $30-179 per year</strong> compared to competitors, 
-              and get <strong>more deals</strong> than most of them!
+              get <strong>more deals</strong> than most of them, and <strong>international destinations</strong> that others don't include!
             </p>
             <p className="text-sm text-gray-500">
               *Prices as of 2024. Competitor features based on public information.
@@ -233,6 +221,11 @@ export default function PricingPage() {
               <h4 className="font-semibold text-gray-900 mb-2">Are the deals real and bookable?</h4>
               <p className="text-gray-600">Absolutely! All deals are verified and include direct booking links. We only share deals we'd book ourselves.</p>
             </div>
+            
+            <div className="bg-white rounded-lg p-6 shadow">
+              <h4 className="font-semibold text-gray-900 mb-2">Do you include international destinations?</h4>
+              <p className="text-gray-600">Yes! Unlike many competitors who focus only on US domestic flights, we find deals to destinations worldwide including Europe, Asia, South America, and more.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -249,22 +242,29 @@ function UpgradeForm({ onUpgrade, isLoading }: { onUpgrade: (email: string) => v
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Enter your email"
-        className="w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-        required
-      />
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full bg-yellow-400 text-yellow-900 px-6 py-3 rounded-lg font-bold hover:bg-yellow-300 disabled:opacity-50 transition-colors"
-      >
-        {isLoading ? 'Processing...' : 'Upgrade to Premium - $20/year'}
-      </button>
-    </form>
+    <div className="space-y-4">
+      <div className="text-center">
+        <p className="text-blue-100 text-sm mb-4">
+          Create your account first, then upgrade to Premium
+        </p>
+      </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter your email"
+          className="w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+          required
+        />
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-yellow-400 text-yellow-900 px-6 py-3 rounded-lg font-bold hover:bg-yellow-300 disabled:opacity-50 transition-colors"
+        >
+          {isLoading ? 'Processing...' : 'Create Account & Upgrade - $20/year'}
+        </button>
+      </form>
+    </div>
   );
 }

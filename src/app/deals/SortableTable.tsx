@@ -301,10 +301,10 @@ export default function SortableTable({
       {showUpgradePrompt && (
         <div className="mt-4 sm:mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 sm:p-6 text-center">
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
-            Want to see all {deals.length} deals and sort them?
+            You're missing out on {deals.length - 5} more deals!
           </h3>
           <p className="text-sm sm:text-base text-gray-600 mb-4">
-            Upgrade to Premium for unlimited access, sorting, filtering, and advanced features.
+            Upgrade to Premium to see ALL {deals.length} deals including the biggest discounts, plus sorting and filtering features.
           </p>
           <a
             href="/pricing"

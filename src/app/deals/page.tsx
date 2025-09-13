@@ -19,7 +19,6 @@ function DealsContent() {
   const { user, subscription, loading: authLoading } = useAuth();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState('');
   const [airportCodes, setAirportCodes] = useState<Map<string, any>>(new Map());
 
   useEffect(() => {
@@ -46,30 +45,6 @@ function DealsContent() {
     loadCodes();
   }, []);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-
-    try {
-      const response = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'deals-page' }),
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        // Store email and reload to check status
-        localStorage.setItem('userEmail', email);
-        window.location.reload();
-      } else {
-        alert(result.error || 'Failed to subscribe');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('Failed to subscribe. Please try again.');
-    }
-  };
 
   if (loading || authLoading) {
     return (
@@ -93,48 +68,69 @@ function DealsContent() {
         <p className="text-sm sm:text-base text-gray-600">
           {isPaid 
             ? 'All deals from the last 7 days, sorted by price' 
-            : 'Lowest priced deals from the last 7 days - upgrade to see all deals and sort!'
+            : 'Showing only the lowest priced deals - upgrade to see ALL deals including the biggest discounts!'
           }
         </p>
       </div>
 
       {!user && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
-          <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-2">Get Started Free</h3>
+          <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-2">Sign In Required</h3>
           <p className="text-sm sm:text-base text-blue-700 mb-4">
-            Enter your email to see the lowest priced deals and access booking links. Upgrade to Premium for all deals and sorting features.
+            Create a free account to see the lowest priced deals and access booking links. Upgrade to Premium to see ALL deals including the biggest discounts!
           </p>
-          <form onSubmit={handleLogin} className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base font-medium"
+          <div className="flex flex-col sm:flex-row gap-3">
+            <a
+              href="/auth?signup=true"
+              className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base font-medium text-center"
             >
-              View Deals
-            </button>
-          </form>
+              Create Free Account
+            </a>
+            <a
+              href="/auth"
+              className="bg-gray-100 text-gray-700 px-4 sm:px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base font-medium text-center"
+            >
+              Sign In
+            </a>
+          </div>
         </div>
       )}
 
-      {user && !isPaid && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
-          <h3 className="text-base sm:text-lg font-semibold text-yellow-900 mb-2">Upgrade to Premium</h3>
-          <p className="text-sm sm:text-base text-yellow-700 mb-4">
-            You're seeing the lowest priced deals with booking links. Upgrade to see all {deals.length} deals, sort by price/route, and get additional features!
-          </p>
-          <a
-            href="/pricing"
-            className="bg-yellow-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-yellow-700 transition-colors inline-block text-sm sm:text-base font-medium"
-          >
-            Upgrade Now - $20/year
-          </a>
+      {user && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1">Account Management</h3>
+              <p className="text-sm text-gray-600">
+                Signed in as <strong>{user.email}</strong>
+                {isPaid ? ' • Premium Member' : ' • Free Account'}
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              {!isPaid && (
+                <a
+                  href="/pricing"
+                  className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium text-center"
+                >
+                  Upgrade to Premium - $20/year
+                </a>
+              )}
+              <a
+                href="/account"
+                className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium text-center"
+              >
+                Manage Account
+              </a>
+            </div>
+          </div>
+          {!isPaid && (
+            <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                You're seeing only the lowest priced deals. You're missing out on <strong>{deals.length - 5} more deals</strong> with bigger discounts! 
+                <a href="/pricing" className="underline hover:no-underline ml-1">Upgrade to see ALL {deals.length} deals and sort them.</a>
+              </p>
+            </div>
+          )}
         </div>
       )}
 
