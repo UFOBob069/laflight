@@ -63,16 +63,22 @@ export default function AccountPage() {
         }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
       const { url } = await response.json();
       
       if (url) {
         window.location.href = url;
       } else {
-        throw new Error('Failed to create checkout session');
+        throw new Error('Failed to create checkout session - no URL returned');
       }
     } catch (error) {
       console.error('Upgrade error:', error);
-      alert('Failed to start upgrade process. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Failed to start upgrade process: ${errorMessage}. Please try again.`);
     } finally {
       setIsUpgrading(false);
     }
