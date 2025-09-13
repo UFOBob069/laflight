@@ -222,6 +222,57 @@ export default function SortableTable({
         </table>
       </div>
 
+      {/* Mobile Sorting Controls */}
+      {allowSorting && (
+        <div className="lg:hidden mb-4">
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Sort by:</h3>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => handleSort('price')}
+                className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
+                  sortConfig.key === 'price' && sortConfig.direction === 'asc'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Price {sortConfig.key === 'price' && sortConfig.direction === 'asc' && '↑'}
+              </button>
+              <button
+                onClick={() => handleSort('price')}
+                className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
+                  sortConfig.key === 'price' && sortConfig.direction === 'desc'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Price {sortConfig.key === 'price' && sortConfig.direction === 'desc' && '↓'}
+              </button>
+              <button
+                onClick={() => handleSort('receivedAt')}
+                className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
+                  sortConfig.key === 'receivedAt' && sortConfig.direction === 'asc'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Date {sortConfig.key === 'receivedAt' && sortConfig.direction === 'asc' && '↑'}
+              </button>
+              <button
+                onClick={() => handleSort('receivedAt')}
+                className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
+                  sortConfig.key === 'receivedAt' && sortConfig.direction === 'desc'
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                Date {sortConfig.key === 'receivedAt' && sortConfig.direction === 'desc' && '↓'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Cards */}
       <div className="lg:hidden space-y-4">
         {sortedDeals.map((d) => (

@@ -87,6 +87,9 @@ function DealsContent() {
     setIsUpgrading(true);
     
     try {
+      const startTime = Date.now();
+      console.log('Starting checkout session creation...');
+      
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -104,8 +107,11 @@ function DealsContent() {
       }
 
       const { url } = await response.json();
+      const apiTime = Date.now() - startTime;
+      console.log(`API response time: ${apiTime}ms`);
       
       if (url) {
+        console.log('Redirecting to Stripe checkout...');
         window.location.href = url;
       } else {
         throw new Error('Failed to create checkout session - no URL returned');

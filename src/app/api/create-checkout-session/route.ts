@@ -9,9 +9,11 @@ const checkoutSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const startTime = Date.now();
   try {
     const body = await req.json();
     console.log('Checkout session request body:', body);
+    console.log('Request received at:', new Date().toISOString());
     
     // Check environment variables
     console.log('STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
@@ -48,7 +50,9 @@ export async function POST(req: NextRequest) {
       cancelUrl: `${baseUrl}/deals`,
     });
 
+    const totalTime = Date.now() - startTime;
     console.log('Checkout session created successfully:', session.id);
+    console.log(`Total API processing time: ${totalTime}ms`);
 
     return NextResponse.json({ 
       sessionId: session.id,

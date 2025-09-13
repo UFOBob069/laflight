@@ -8,6 +8,7 @@ function SuccessContent() {
   const sessionId = searchParams.get('session_id');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
     if (sessionId) {
@@ -17,18 +18,50 @@ function SuccessContent() {
         .then(data => {
           if (data.success) {
             setIsLoading(false);
+            // Auto-redirect to deals page after 3 seconds
+            const countdownInterval = setInterval(() => {
+              setCountdown(prev => {
+                if (prev <= 1) {
+                  clearInterval(countdownInterval);
+                  window.location.href = '/deals';
+                  return 0;
+                }
+                return prev - 1;
+              });
+            }, 1000);
           } else {
             setError(data.error || 'Payment verification failed');
             setIsLoading(false);
           }
         })
         .catch(err => {
-          setError('Failed to verify payment');
+          console.error('Verification error:', err);
+          // Even if verification fails, redirect to deals page
           setIsLoading(false);
+          const countdownInterval = setInterval(() => {
+            setCountdown(prev => {
+              if (prev <= 1) {
+                clearInterval(countdownInterval);
+                window.location.href = '/deals';
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
         });
     } else {
-      setError('No session ID provided');
+      // No session ID, just redirect to deals page
       setIsLoading(false);
+      const countdownInterval = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval);
+            window.location.href = '/deals';
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
   }, [sessionId]);
 
@@ -68,6 +101,9 @@ function SuccessContent() {
         <h1 className="text-3xl font-bold text-gray-900 mb-4">Welcome to Premium!</h1>
         <p className="text-gray-600 mb-6">
           Your subscription is now active. You'll receive your first premium digest next Sunday with all the best flight deals!
+        </p>
+        <p className="text-blue-600 font-semibold mb-6">
+          Redirecting to deals page in {countdown} seconds...
         </p>
         
         <div className="bg-white rounded-lg p-6 shadow-lg mb-6">
