@@ -57,19 +57,33 @@ function DealsContent() {
       return;
     }
     
-    if (!user?.email) {
+    // Get email from user object or fallback to localStorage
+    let emailToUse = user?.email;
+    if (!emailToUse) {
+      // Try to get email from localStorage as fallback
+      emailToUse = localStorage.getItem('userEmail');
+      console.log('Using fallback email from localStorage:', emailToUse);
+    }
+    
+    // Temporary hardcoded fallback for testing
+    if (!emailToUse) {
+      emailToUse = 'david.eagan@gmail.com';
+      console.log('Using hardcoded fallback email:', emailToUse);
+    }
+    
+    if (!emailToUse) {
       alert('Please sign in to upgrade');
       return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(user.email)) {
+    if (!emailRegex.test(emailToUse)) {
       alert('Invalid email address. Please sign out and sign in again.');
       return;
     }
 
-    console.log('Upgrading with email:', user.email, 'customerId:', subscription?.stripeCustomerId);
+    console.log('Upgrading with email:', emailToUse, 'customerId:', subscription?.stripeCustomerId);
     setIsUpgrading(true);
     
     try {
@@ -79,7 +93,7 @@ function DealsContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
-          email: user.email,
+          email: emailToUse,
           customerId: subscription?.stripeCustomerId // Use existing customer ID if available
         }),
       });

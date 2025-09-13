@@ -7,7 +7,7 @@ export const stripe = process.env.STRIPE_SECRET_KEY
     })
   : null;
 
-export const PRICE_ID = process.env.STRIPE_PRICE_ID || 'price_1234567890'; // Replace with your actual price ID
+export const PRICE_ID = process.env.STRIPE_PRICE_ID || 'price_1QJ1234567890'; // Replace with your actual price ID
 
 export async function createCheckoutSession({
   email,

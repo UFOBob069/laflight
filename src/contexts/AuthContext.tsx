@@ -40,6 +40,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(firebaseUser);
       
       if (firebaseUser) {
+        // Store email in localStorage as fallback
+        if (firebaseUser.email) {
+          localStorage.setItem('userEmail', firebaseUser.email);
+        }
+        
         // Get subscription status from our API
         try {
           const response = await fetch(`/api/user-subscription?email=${encodeURIComponent(firebaseUser.email!)}`);
@@ -56,6 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } else {
         setSubscription(null);
+        localStorage.removeItem('userEmail');
       }
       
       setLoading(false);
