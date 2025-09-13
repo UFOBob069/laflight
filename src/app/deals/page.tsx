@@ -47,11 +47,29 @@ function DealsContent() {
   }, []);
 
   const handleUpgrade = async () => {
+    console.log('Auth loading:', authLoading);
+    console.log('User object:', user);
+    console.log('User email:', user?.email);
+    console.log('Subscription:', subscription);
+    
+    if (authLoading) {
+      alert('Please wait while we load your account information...');
+      return;
+    }
+    
     if (!user?.email) {
       alert('Please sign in to upgrade');
       return;
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(user.email)) {
+      alert('Invalid email address. Please sign out and sign in again.');
+      return;
+    }
+
+    console.log('Upgrading with email:', user.email, 'customerId:', subscription?.stripeCustomerId);
     setIsUpgrading(true);
     
     try {
