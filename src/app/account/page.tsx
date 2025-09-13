@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function AccountPage() {
   const { user, subscription, loading: authLoading, logout } = useAuth();
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
 
   const handleManageSubscription = async () => {
     if (!subscription?.isPaid || !user?.email) {
@@ -39,6 +40,41 @@ export default function AccountPage() {
       alert('Failed to open subscription management. Please try again.');
     } finally {
       setIsLoadingPortal(false);
+    }
+  };
+
+  const handleUpgrade = async () => {
+    if (!user?.email) {
+      alert('Please sign in to upgrade');
+      return;
+    }
+
+    setIsUpgrading(true);
+    
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email: user.email,
+          customerId: subscription?.stripeCustomerId // Use existing customer ID if available
+        }),
+      });
+
+      const { url } = await response.json();
+      
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error('Failed to create checkout session');
+      }
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      alert('Failed to start upgrade process. Please try again.');
+    } finally {
+      setIsUpgrading(false);
     }
   };
 
@@ -142,12 +178,13 @@ export default function AccountPage() {
                 <p className="text-gray-600 mb-4">
                   Get access to all deals, sorting features, and direct booking links.
                 </p>
-                <a
-                  href="/pricing"
-                  className="bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition-colors inline-block"
+                <button
+                  onClick={handleUpgrade}
+                  disabled={isUpgrading}
+                  className="bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 disabled:opacity-50 transition-colors"
                 >
-                  Upgrade Now - $20/year
-                </a>
+                  {isUpgrading ? 'Processing...' : 'Upgrade Now - $20/year'}
+                </button>
               </div>
             )}
 

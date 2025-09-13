@@ -1,9 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function PricingPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
+  const { user, subscription, loading: authLoading } = useAuth();
 
   const handleUpgrade = async (email: string) => {
     if (!email) {
@@ -13,6 +16,41 @@ export default function PricingPage() {
 
     // Redirect to auth page to create account first, then upgrade
     window.location.href = '/auth?email=' + encodeURIComponent(email) + '&signup=true&upgrade=true';
+  };
+
+  const handleDirectUpgrade = async () => {
+    if (!user?.email) {
+      alert('Please sign in to upgrade');
+      return;
+    }
+
+    setIsUpgrading(true);
+    
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email: user.email,
+          customerId: subscription?.stripeCustomerId // Use existing customer ID if available
+        }),
+      });
+
+      const { url } = await response.json();
+      
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error('Failed to create checkout session');
+      }
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      alert('Failed to start upgrade process. Please try again.');
+    } finally {
+      setIsUpgrading(false);
+    }
   };
 
   return (
@@ -136,7 +174,41 @@ export default function PricingPage() {
             </ul>
             
             <div className="text-center">
-              <UpgradeForm onUpgrade={handleUpgrade} isLoading={isLoading} />
+              {user ? (
+                // Logged in user - direct upgrade
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <p className="text-blue-100 text-sm mb-4">
+                      Signed in as: <strong>{user.email}</strong>
+                    </p>
+                    {subscription?.isPaid && (
+                      <p className="text-green-200 text-sm mb-4">
+                        ✅ You already have Premium access!
+                      </p>
+                    )}
+                  </div>
+                  {!subscription?.isPaid && (
+                    <button
+                      onClick={handleDirectUpgrade}
+                      disabled={isUpgrading}
+                      className="w-full bg-yellow-400 text-yellow-900 px-6 py-3 rounded-lg font-bold hover:bg-yellow-300 disabled:opacity-50 transition-colors"
+                    >
+                      {isUpgrading ? 'Processing...' : 'Upgrade to Premium - $20/year'}
+                    </button>
+                  )}
+                  {subscription?.isPaid && (
+                    <a
+                      href="/deals"
+                      className="w-full bg-green-400 text-green-900 px-6 py-3 rounded-lg font-bold hover:bg-green-300 transition-colors inline-block"
+                    >
+                      View All Deals
+                    </a>
+                  )}
+                </div>
+              ) : (
+                // Not logged in - show email form
+                <UpgradeForm onUpgrade={handleUpgrade} isLoading={isLoading} />
+              )}
             </div>
           </div>
         </div>

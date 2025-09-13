@@ -88,7 +88,7 @@ export default function HomePage() {
                 <span>Join 12,847 travelers saving money</span>
               </div>
               <div>⭐ 4.9/5 rating</div>
-              <div>🔒 100% free, no spam</div>
+              <div>🔒 Secure, no spam</div>
             </div>
           </div>
         </div>
@@ -176,23 +176,23 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Price Anchoring & Urgency */}
+      {/* Price Anchoring & Value */}
       <section className="py-16 bg-blue-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Limited Time: Free Access</h2>
-          <p className="text-xl mb-8">Normally $47/month, but you can try it free for 30 days</p>
+          <h2 className="text-3xl font-bold mb-4">Unbeatable Value</h2>
+          <p className="text-xl mb-8">Save $30-179 per year compared to competitors</p>
           
           <div className="bg-white text-gray-900 p-8 rounded-lg max-w-md mx-auto">
-            <div className="text-4xl font-bold text-blue-600 mb-2">$0</div>
-            <div className="text-lg mb-4">First 30 days free</div>
-            <div className="text-sm text-gray-500 line-through mb-6">Then $47/month</div>
+            <div className="text-4xl font-bold text-blue-600 mb-2">$20</div>
+            <div className="text-lg mb-4">per year</div>
+            <div className="text-sm text-gray-500 mb-6">Less than $2/month</div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter my email for free access"
+                placeholder="Enter my email to get started"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -201,11 +201,11 @@ export default function HomePage() {
                 disabled={isSubmitting}
                 className="w-full bg-blue-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                {isSubmitting ? 'Starting My Free Trial...' : 'Start My Free Trial'}
+                {isSubmitting ? 'Getting Started...' : 'Get Started - $20/year'}
               </button>
             </form>
             
-            <p className="text-xs text-gray-500 mt-4">Cancel anytime. No credit card required.</p>
+            <p className="text-xs text-gray-500 mt-4">Cancel anytime. No hidden fees.</p>
           </div>
         </div>
       </section>
@@ -223,8 +223,8 @@ export default function HomePage() {
               <span>No spam, ever</span>
             </div>
             <div className="flex items-center">
-              <span className="text-2xl mr-2">✅</span>
-              <span>30-day guarantee</span>
+              <span className="text-2xl mr-2">💰</span>
+              <span>Pays for itself in one trip</span>
             </div>
             <div className="flex items-center">
               <span className="text-2xl mr-2">🚫</span>
@@ -246,8 +246,8 @@ export default function HomePage() {
             </div>
             
             <div>
-              <h3 className="text-lg font-semibold mb-2">Is this really free?</h3>
-              <p className="text-gray-600">Yes! Your first 30 days are completely free. No credit card required to start.</p>
+              <h3 className="text-lg font-semibold mb-2">How much does it cost?</h3>
+              <p className="text-gray-600">Just $20 per year - less than $2 per month. That's less than a coffee and pays for itself in one booking!</p>
             </div>
             
             <div>
@@ -289,7 +289,7 @@ export default function HomePage() {
             </div>
           </form>
           
-          <p className="text-sm text-gray-400 mt-4">Free for 30 days • Cancel anytime • No spam</p>
+          <p className="text-sm text-gray-400 mt-4">$20/year • Cancel anytime • No spam</p>
         </div>
       </section>
     </div>
