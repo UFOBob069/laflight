@@ -20,7 +20,7 @@ export async function createCheckoutSession({
   priceId?: string;
   successUrl: string;
   cancelUrl: string;
-  customerId?: string;
+  customerId?: string | null;
 }) {
   if (!stripe) {
     throw new Error('Stripe is not configured. Please set STRIPE_SECRET_KEY environment variable.');

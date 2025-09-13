@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     
     const session = await createCheckoutSession({
       email,
-      customerId,
+      customerId: customerId || undefined, // Convert null to undefined
       successUrl: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${baseUrl}/deals`,
     });
