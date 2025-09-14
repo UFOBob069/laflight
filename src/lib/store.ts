@@ -49,30 +49,41 @@ export async function saveDeals(items: Array<any>) {
   }
 }
 
-export async function getTopDeals({ limit = 50, days = 7 } = {}) {
+export async function getTopDeals({ limit = 100, days = 7, sortBy = 'discount', isPaid = false } = {}) {
   try {
     const db = getFirestoreDB();
     const since = dayjs().subtract(days, 'day').toISOString();
-    console.log('Fetching deals since:', since);
+    console.log('Fetching deals since:', since, 'sortBy:', sortBy, 'isPaid:', isPaid);
+    
+    // Get more deals to ensure we have enough for proper sorting
+    const fetchLimit = Math.max(limit * 3, 200); // Fetch more to account for filtering and sorting
     
     // First try the compound query (requires index) - use receivedAt for email date
     try {
       const snap = await db.collection('deals')
         .where('receivedAt', '>=', since)
-        .orderBy('price', 'asc')
-        .limit(limit)
+        .orderBy('receivedAt', 'desc') // Get most recent first
+        .limit(fetchLimit)
         .get();
       
       const deals = snap.docs.map((d: any) => d.data());
       console.log('Found deals with compound query:', deals.length);
-      return deals;
+      
+      // Sort based on user type and preference
+      const sortedDeals = isPaid 
+        ? sortDealsByDiscount(deals, limit)  // Paid: biggest discounts first
+        : sortDealsByPrice(deals, limit);    // Free: lowest price first
+      
+      console.log(`Final deals returned (${isPaid ? 'discount' : 'price'} sorted):`, sortedDeals.length);
+      return sortedDeals;
+      
     } catch (indexError) {
       console.log('Compound query failed (missing index), trying simple query...');
       
-      // Fallback: get all deals and filter in memory
+      // Fallback: get recent deals and filter in memory
       const snap = await db.collection('deals')
         .orderBy('receivedAt', 'desc')
-        .limit(limit * 3) // Get more to account for filtering
+        .limit(fetchLimit)
         .get();
       
       const allDeals = snap.docs.map((d: any) => d.data());
@@ -87,17 +98,107 @@ export async function getTopDeals({ limit = 50, days = 7 } = {}) {
       
       console.log('Deals after date filtering:', recentDeals.length);
       
-      // Sort by price and limit
-      const sortedDeals = recentDeals
-        .filter((deal: any) => deal.price) // Only deals with prices
-        .sort((a: any, b: any) => (a.price || 0) - (b.price || 0))
-        .slice(0, limit);
+      // Sort based on user type and preference
+      const sortedDeals = isPaid 
+        ? sortDealsByDiscount(recentDeals, limit)  // Paid: biggest discounts first
+        : sortDealsByPrice(recentDeals, limit);    // Free: lowest price first
       
-      console.log('Final deals returned:', sortedDeals.length);
+      console.log(`Final deals returned (${isPaid ? 'discount' : 'price'} sorted):`, sortedDeals.length);
       return sortedDeals;
     }
   } catch (error) {
     console.error('Error in getTopDeals:', error);
     return [];
   }
+}
+
+/**
+ * Sort deals by discount percentage (biggest discounts first)
+ * Falls back to price (lowest first) for deals without discount info
+ */
+function sortDealsByDiscount(deals: any[], limit: number) {
+  return deals
+    .filter((deal: any) => deal.price) // Only deals with prices
+    .map((deal: any) => ({
+      ...deal,
+      // Extract discount percentage for sorting
+      discountPercentage: extractDiscountPercentage(deal.discount),
+      // Calculate a composite score for better ranking
+      score: calculateDealScore(deal)
+    }))
+    .sort((a: any, b: any) => {
+      // Primary sort: by discount percentage (descending - biggest discounts first)
+      if (a.discountPercentage > 0 && b.discountPercentage > 0) {
+        return b.discountPercentage - a.discountPercentage;
+      }
+      
+      // Secondary sort: deals with discounts vs without
+      if (a.discountPercentage > 0 && b.discountPercentage === 0) return -1;
+      if (a.discountPercentage === 0 && b.discountPercentage > 0) return 1;
+      
+      // Tertiary sort: by composite score (higher is better)
+      if (a.score !== b.score) {
+        return b.score - a.score;
+      }
+      
+      // Final sort: by price (ascending - cheapest first)
+      return (a.price || 0) - (b.price || 0);
+    })
+    .slice(0, limit);
+}
+
+/**
+ * Sort deals by price (lowest price first) for free users
+ * Simple price-based sorting to show the cheapest deals
+ */
+function sortDealsByPrice(deals: any[], limit: number) {
+  return deals
+    .filter((deal: any) => deal.price) // Only deals with prices
+    .sort((a: any, b: any) => (a.price || 0) - (b.price || 0)) // Sort by price ascending
+    .slice(0, limit);
+}
+
+/**
+ * Extract discount percentage from discount string (e.g., "SAVE 16%" -> 16)
+ */
+function extractDiscountPercentage(discount: string | undefined): number {
+  if (!discount) return 0;
+  const match = String(discount).match(/(\d+)%/);
+  return match ? parseInt(match[1]) : 0;
+}
+
+/**
+ * Calculate a composite score for deal ranking
+ * Higher score = better deal
+ */
+function calculateDealScore(deal: any): number {
+  let score = 0;
+  
+  // Base score from discount percentage
+  const discountPct = extractDiscountPercentage(deal.discount);
+  score += discountPct * 10; // Weight discount heavily
+  
+  // Bonus for very low prices (under $500)
+  if (deal.price && deal.price < 500) {
+    score += 50;
+  }
+  
+  // Bonus for international destinations (more valuable)
+  const isInternational = deal.destination && 
+    !['LAX', 'SFO', 'SEA', 'PDX', 'SAN', 'LAS', 'PHX', 'DEN', 'DFW', 'IAH', 'ATL', 'MIA', 'JFK', 'LGA', 'EWR', 'BOS', 'ORD', 'DTW', 'MSP', 'MCO', 'TPA', 'FLL', 'CLT', 'RDU', 'BWI', 'DCA', 'IAD'].includes(deal.destination);
+  if (isInternational) {
+    score += 20;
+  }
+  
+  // Bonus for direct flights
+  if (deal.stops && (deal.stops.includes('Direct') || deal.stops.includes('Nonstop'))) {
+    score += 15;
+  }
+  
+  // Penalty for very high prices (over $1000)
+  if (deal.price && deal.price > 1000) {
+    score -= 20;
+  }
+  
+  return score;
 }

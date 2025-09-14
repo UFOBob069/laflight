@@ -25,9 +25,15 @@ function DealsContent() {
   useEffect(() => {
     const fetchDeals = async () => {
       try {
-        const response = await fetch('/api/deals');
+        // Fetch deals based on subscription status
+        const isPaid = subscription?.isPaid || false;
+        const limit = isPaid ? 100 : 5;
+        const sortBy = isPaid ? 'discount' : 'price';
+        
+        const response = await fetch(`/api/deals?limit=${limit}&sortBy=${sortBy}&isPaid=${isPaid}`);
         const data = await response.json();
         setDeals(data.deals || []);
+        console.log(`📊 Fetched ${data.deals?.length || 0} deals for ${isPaid ? 'paid' : 'free'} user, sorted by ${data.sortBy || sortBy}`);
       } catch (error) {
         console.error('Error fetching deals:', error);
       } finally {
@@ -36,7 +42,7 @@ function DealsContent() {
     };
 
     fetchDeals();
-  }, []);
+  }, [subscription]);
 
   useEffect(() => {
     const loadCodes = async () => {
@@ -142,12 +148,12 @@ function DealsContent() {
     <main className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
       <div className="mb-4 sm:mb-6">
         <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
-          {isPaid ? 'All Flight Deals' : 'Lowest Priced Deals (Free Preview)'}
+          {isPaid ? 'Best Flight Deals' : 'Biggest Discounts (Free Preview)'}
         </h1>
         <p className="text-sm sm:text-base text-gray-600">
           {isPaid 
-            ? 'All deals from the last 7 days, sorted by price' 
-            : 'Showing only the lowest priced deals - upgrade to see ALL deals including the biggest discounts!'
+            ? 'All deals from the last 7 days, ranked by biggest discounts' 
+            : 'Showing only the biggest discount deals - upgrade to see ALL deals including the best savings!'
           }
         </p>
       </div>

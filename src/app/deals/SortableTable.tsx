@@ -181,8 +181,8 @@ export default function SortableTable({
                 </td>
                 <td className="px-4 py-3">
                   {d.discount ? (
-                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
-                      {d.discount}
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      🔥 {d.discount}
                     </span>
                   ) : (
                     <span className="text-gray-400">—</span>
@@ -229,6 +229,16 @@ export default function SortableTable({
             <h3 className="text-sm font-semibold text-gray-900 mb-3">Sort by:</h3>
             <div className="grid grid-cols-2 gap-2">
               <button
+                onClick={() => handleSort('discount')}
+                className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
+                  sortConfig.key === 'discount' && sortConfig.direction === 'desc'
+                    ? 'bg-red-600 text-white border-red-600'
+                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                🔥 Discount {sortConfig.key === 'discount' && sortConfig.direction === 'desc' && '↓'}
+              </button>
+              <button
                 onClick={() => handleSort('price')}
                 className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
                   sortConfig.key === 'price' && sortConfig.direction === 'asc'
@@ -237,16 +247,6 @@ export default function SortableTable({
                 }`}
               >
                 Price {sortConfig.key === 'price' && sortConfig.direction === 'asc' && '↑'}
-              </button>
-              <button
-                onClick={() => handleSort('price')}
-                className={`px-3 py-2 text-xs rounded-lg border transition-colors ${
-                  sortConfig.key === 'price' && sortConfig.direction === 'desc'
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                Price {sortConfig.key === 'price' && sortConfig.direction === 'desc' && '↓'}
               </button>
               <button
                 onClick={() => handleSort('receivedAt')}

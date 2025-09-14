@@ -35,7 +35,7 @@ export async function sendDigestEmail({ to, deals, isPaid = false }: { to: strin
           ✈️ Best LAX Deals
         </h1>
         <p style="color:#e0e7ff;margin:8px 0 0 0;font-size:16px;font-weight:500">
-          ${isPaid ? 'All Flight Deals' : 'Lowest Priced Deals'} • Last 7 Days • ${displayDeals.length}${isPaid ? '' : ` of ${totalDeals}`} deals found
+          ${isPaid ? 'Best Flight Deals' : 'Biggest Discounts'} • Last 7 Days • ${displayDeals.length}${isPaid ? '' : ` of ${totalDeals}`} deals found
         </p>
       </div>
       
@@ -62,11 +62,11 @@ export async function sendDigestEmail({ to, deals, isPaid = false }: { to: strin
           <span style="font-size:24px;margin-right:10px">🔒</span>
           <h3 style="color:#92400e;margin:0;font-size:18px;font-weight:600">Free Preview</h3>
         </div>
-        <p style="color:#92400e;margin:0;font-size:15px;line-height:1.5">
-          You're seeing the <strong>5 lowest priced deals</strong>. 
-          <a href="${process.env.SITE_URL}/pricing" style="color:#92400e;text-decoration:underline;font-weight:600">Upgrade to Premium</a> 
-          to see all ${totalDeals} deals with direct booking links!
-        </p>
+             <p style="color:#92400e;margin:0;font-size:15px;line-height:1.5">
+               You're seeing the <strong>5 biggest discount deals</strong>. 
+               <a href="${process.env.SITE_URL}/pricing" style="color:#92400e;text-decoration:underline;font-weight:600">Upgrade to Premium</a> 
+               to see all ${totalDeals} deals with direct booking links!
+             </p>
       </div>
       ` : ''}
       
@@ -120,10 +120,10 @@ export async function sendDigestEmail({ to, deals, isPaid = false }: { to: strin
             Want More Deals?
           </h3>
         </div>
-        <p style="color:#0c4a6e;margin:0 0 20px 0;font-size:16px;line-height:1.5">
-          Get access to all <strong>${totalDeals} deals</strong> with direct booking links, 
-          sorting features, and exclusive international destinations for just <strong>$20/year</strong>!
-        </p>
+             <p style="color:#0c4a6e;margin:0 0 20px 0;font-size:16px;line-height:1.5">
+               Get access to all <strong>${totalDeals} deals</strong> with direct booking links, 
+               biggest discounts first, and exclusive international destinations for just <strong>$20/year</strong>!
+             </p>
         <a href="${process.env.SITE_URL}/pricing" style="background:linear-gradient(135deg,#0ea5e9 0%,#0284c7 100%);color:#ffffff;padding:15px 30px;text-decoration:none;border-radius:8px;display:inline-block;font-weight:700;font-size:16px;box-shadow:0 4px 6px rgba(14,165,233,0.3);transition:all 0.2s ease">
           Upgrade to Premium - $20/year
         </a>

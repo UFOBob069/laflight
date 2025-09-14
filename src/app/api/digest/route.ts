@@ -11,21 +11,23 @@ export async function POST(req: NextRequest) {
 
   try {
     const { to } = await req.json().catch(() => ({}));
-    const deals = await getTopDeals({ limit: 50, days: 7 });
-
-    if (deals.length === 0) {
-      return NextResponse.json({ 
-        message: 'No deals found to send in digest',
-        count: 0
-      });
-    }
-
+    
     // If specific email provided, send to that email
     if (to) {
+      // Get deals sorted by discount for manual sends (assume paid user)
+      const deals = await getTopDeals({ limit: 50, days: 7, sortBy: 'discount', isPaid: true });
+      
+      if (deals.length === 0) {
+        return NextResponse.json({ 
+          message: 'No deals found to send in digest',
+          count: 0
+        });
+      }
+
       const result = await sendDigestEmail({
         to,
         deals,
-        isPaid: false // Default to free for manual sends
+        isPaid: true // Manual sends get full discount-sorted deals
       });
 
       return NextResponse.json({ 
@@ -44,6 +46,16 @@ export async function POST(req: NextRequest) {
     if (subscribers.empty) {
       return NextResponse.json({ 
         message: 'No active subscribers found',
+        count: 0
+      });
+    }
+
+    // Get deals sorted by discount for all subscribers
+    const deals = await getTopDeals({ limit: 50, days: 7, sortBy: 'discount', isPaid: true });
+
+    if (deals.length === 0) {
+      return NextResponse.json({ 
+        message: 'No deals found to send in digest',
         count: 0
       });
     }
