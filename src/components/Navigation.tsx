@@ -7,6 +7,15 @@ export default function Navigation() {
   const { user, subscription, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // List of admin email addresses
+  const adminEmails = [
+    'david.eagan@gmail.com', // Admin email
+    'admin@bestlaxdeals.com', // Add any other admin emails
+  ];
+
+  // Check if current user is an admin
+  const isAdmin = user && adminEmails.includes(user.email || '');
+
   return (
     <nav className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,6 +31,9 @@ export default function Navigation() {
           <div className="hidden md:flex items-center space-x-4">
             <a href="/deals" className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
               Deals
+            </a>
+            <a href="/about" className="text-gray-600 hover:text-gray-900">
+              About
             </a>
             <a href="/pricing" className="text-gray-600 hover:text-gray-900">
               Pricing
@@ -50,9 +62,11 @@ export default function Navigation() {
               </a>
             )}
             
-            <a href="/admin" className="text-gray-600 hover:text-gray-900">
-              Admin
-            </a>
+            {isAdmin && (
+              <a href="/admin" className="text-gray-600 hover:text-gray-900">
+                Admin
+              </a>
+            )}
           </div>
 
           {/* Mobile Hamburger Button */}
@@ -83,6 +97,13 @@ export default function Navigation() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Deals
+              </a>
+              <a
+                href="/about"
+                className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                About
               </a>
               <a
                 href="/pricing"
@@ -128,13 +149,15 @@ export default function Navigation() {
                 </a>
               )}
               
-              <a
-                href="/admin"
-                className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Admin
-              </a>
+              {isAdmin && (
+                <a
+                  href="/admin"
+                  className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Admin
+                </a>
+              )}
             </div>
           </div>
         )}

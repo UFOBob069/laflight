@@ -44,7 +44,6 @@ export async function createCheckoutSession({
     // Performance optimizations
     allow_promotion_codes: false,
     billing_address_collection: 'auto',
-    shipping_address_collection: null,
     phone_number_collection: {
       enabled: false,
     },
