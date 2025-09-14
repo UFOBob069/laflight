@@ -2,17 +2,17 @@ export function getOrganizationSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "Best LAX Deals",
-    "description": "Best LAX Deals monitors 50+ flight deal sources 24/7 to find the lowest prices from Los Angeles. Get weekly flight deals, direct booking links, and save $30-179 per year compared to competitors.",
-    "url": process.env.SITE_URL || "https://www.bestlaxdeals.com",
-    "logo": `${process.env.SITE_URL || "https://www.bestlaxdeals.com"}/logo.png`,
+    "name": "LAFareDrop",
+    "description": "LAFareDrop monitors 50+ flight deal sources 24/7 to find the lowest prices from Los Angeles. Get weekly flight deals, direct booking links, and save $30-179 per year compared to competitors.",
+    "url": process.env.SITE_URL || "https://www.lafaredrop.com",
+    "logo": `${process.env.SITE_URL || "https://www.lafaredrop.com"}/logo.png`,
     "sameAs": [
-      "https://twitter.com/bestlaxdeals",
-      "https://facebook.com/bestlaxdeals"
+      "https://twitter.com/lafaredrop",
+      "https://facebook.com/lafaredrop"
     ],
     "contactPoint": {
       "@type": "ContactPoint",
-      "email": "support@bestlaxdeals.com",
+      "email": "support@lafaredrop.com",
       "contactType": "customer service"
     },
     "address": {
@@ -52,23 +52,23 @@ export function getWebSiteSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "Best LAX Deals",
+    "name": "LAFareDrop",
     "description": "Find the best flight deals from Los Angeles (LAX) to destinations worldwide. Monitor 50+ sources 24/7 for the lowest prices.",
-    "url": process.env.SITE_URL || "https://www.bestlaxdeals.com",
+    "url": process.env.SITE_URL || "https://www.lafaredrop.com",
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": `${process.env.SITE_URL || "https://www.bestlaxdeals.com"}/deals?search={search_term_string}`
+        "urlTemplate": `${process.env.SITE_URL || "https://www.lafaredrop.com"}/deals?search={search_term_string}`
       },
       "query-input": "required name=search_term_string"
     },
     "publisher": {
       "@type": "Organization",
-      "name": "Best LAX Deals",
+      "name": "LAFareDrop",
       "logo": {
         "@type": "ImageObject",
-        "url": `${process.env.SITE_URL || "https://www.bestlaxdeals.com"}/logo.png`
+        "url": `${process.env.SITE_URL || "https://www.lafaredrop.com"}/logo.png`
       }
     }
   }
@@ -82,7 +82,7 @@ export function getServiceSchema() {
     "description": "Weekly flight deals from Los Angeles with direct booking links, international destinations, and premium features",
     "provider": {
       "@type": "Organization",
-      "name": "Best LAX Deals"
+      "name": "LAFareDrop"
     },
     "areaServed": {
       "@type": "Country",
@@ -120,10 +120,10 @@ export function getFAQSchema() {
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "How much does Best LAX Deals cost?",
+        "name": "How much does LAFareDrop cost?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Best LAX Deals offers a free tier with the top 5 lowest priced deals every week. Premium subscription is $20/year and includes all deals with direct booking links, international destinations, sorting features, and price alerts."
+          "text": "LAFareDrop offers a free tier with the top 5 lowest priced deals every week. Premium subscription is $20/year and includes all deals with direct booking links, international destinations, sorting features, and price alerts."
         }
       },
       {

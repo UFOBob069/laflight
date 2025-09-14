@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { getOrganizationSchema, getServiceSchema } from '@/lib/structured-data';
 
 export const metadata: Metadata = {
-  title: 'About Best LAX Deals - How We Find Secret Flight Deals from Los Angeles',
-  description: 'Discover how Best LAX Deals finds hidden flight deals from Los Angeles that airlines don\'t want you to see. Our AI monitors 50+ sources 24/7 to uncover secret savings of $30-179 per year.',
+  title: 'About LAFareDrop - How We Find Secret Flight Deals from Los Angeles',
+  description: 'Discover how LAFareDrop finds hidden flight deals from Los Angeles that airlines don\'t want you to see. Our AI monitors 50+ sources 24/7 to uncover secret savings of $30-179 per year.',
   keywords: [
     'about best LAX deals',
     'how we find flight deals',
@@ -25,13 +25,13 @@ export const metadata: Metadata = {
         url: '/about-og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'About Best LAX Deals - Secret Flight Deals from Los Angeles',
+        alt: 'About LAFareDrop - Secret Flight Deals from Los Angeles',
       },
     ],
   },
   twitter: {
-    title: 'About Best LAX Deals - How We Find Secret Flight Deals from Los Angeles',
-    description: 'Discover how Best LAX Deals finds hidden flight deals from Los Angeles that airlines don\'t want you to see.',
+    title: 'About LAFareDrop - How We Find Secret Flight Deals from Los Angeles',
+    description: 'Discover how LAFareDrop finds hidden flight deals from Los Angeles that airlines don\'t want you to see.',
     images: ['/about-twitter-image.jpg'],
   },
   alternates: {

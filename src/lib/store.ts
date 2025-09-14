@@ -117,16 +117,45 @@ export async function getTopDeals({ limit = 100, days = 7, sortBy = 'discount', 
  * Falls back to price (lowest first) for deals without discount info
  */
 function sortDealsByDiscount(deals: any[], limit: number) {
-  return deals
+  console.log('🔍 Sorting deals by discount. Total deals:', deals.length);
+  
+  const processedDeals = deals
     .filter((deal: any) => deal.price) // Only deals with prices
-    .map((deal: any) => ({
-      ...deal,
-      // Extract discount percentage for sorting
-      discountPercentage: extractDiscountPercentage(deal.discount),
-      // Calculate a composite score for better ranking
-      score: calculateDealScore(deal)
-    }))
-    .sort((a: any, b: any) => {
+    .map((deal: any) => {
+      const discountPercentage = extractDiscountPercentage(deal.discount);
+      const score = calculateDealScore(deal);
+      
+      // Debug logging for first few deals
+      if (deals.indexOf(deal) < 3) {
+        console.log(`🔍 Deal ${deals.indexOf(deal) + 1}:`, {
+          origin: deal.origin,
+          destination: deal.destination,
+          price: deal.price,
+          discount: deal.discount,
+          discountPercentage,
+          score
+        });
+      }
+      
+      return {
+        ...deal,
+        discountPercentage,
+        score
+      };
+    });
+  
+  const dealsWithDiscounts = processedDeals.filter(d => d.discountPercentage > 0);
+  console.log('🔍 Deals with discount info:', dealsWithDiscounts.length);
+  
+  // If no deals have discount info, fall back to price sorting
+  if (dealsWithDiscounts.length === 0) {
+    console.log('⚠️ No deals with discount info found, falling back to price sorting');
+    return processedDeals
+      .sort((a: any, b: any) => (a.price || 0) - (b.price || 0))
+      .slice(0, limit);
+  }
+  
+  const sortedDeals = processedDeals.sort((a: any, b: any) => {
       // Primary sort: by discount percentage (descending - biggest discounts first)
       if (a.discountPercentage > 0 && b.discountPercentage > 0) {
         return b.discountPercentage - a.discountPercentage;
@@ -145,6 +174,16 @@ function sortDealsByDiscount(deals: any[], limit: number) {
       return (a.price || 0) - (b.price || 0);
     })
     .slice(0, limit);
+  
+  console.log('🔍 Top 3 sorted deals:', sortedDeals.slice(0, 3).map(d => ({
+    origin: d.origin,
+    destination: d.destination,
+    price: d.price,
+    discount: d.discount,
+    discountPercentage: d.discountPercentage
+  })));
+  
+  return sortedDeals;
 }
 
 /**
@@ -163,8 +202,28 @@ function sortDealsByPrice(deals: any[], limit: number) {
  */
 function extractDiscountPercentage(discount: string | undefined): number {
   if (!discount) return 0;
-  const match = String(discount).match(/(\d+)%/);
-  return match ? parseInt(match[1]) : 0;
+  
+  // Try multiple patterns to extract percentage
+  const patterns = [
+    /(\d+)%/,                    // "16%" or "SAVE 16%"
+    /SAVE\s+(\d+)%/i,           // "SAVE 16%"
+    /(\d+)\s*%/,                // "16 %"
+    /save\s+(\d+)%/i,           // "save 16%"
+    /(\d+)%\s*off/i,            // "16% off"
+    /(\d+)%\s*discount/i,       // "16% discount"
+  ];
+  
+  for (const pattern of patterns) {
+    const match = String(discount).match(pattern);
+    if (match) {
+      const percentage = parseInt(match[1]);
+      if (percentage > 0 && percentage <= 100) {
+        return percentage;
+      }
+    }
+  }
+  
+  return 0;
 }
 
 /**

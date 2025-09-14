@@ -10,7 +10,7 @@ export default function Navigation() {
   // List of admin email addresses
   const adminEmails = [
     'david.eagan@gmail.com', // Admin email
-    'admin@bestlaxdeals.com', // Add any other admin emails
+    'admin@lafaredrop.com', // Add any other admin emails
   ];
 
   // Check if current user is an admin
@@ -23,7 +23,7 @@ export default function Navigation() {
           {/* Logo */}
           <div className="flex items-center">
             <a href="/" className="text-xl font-bold text-gray-900">
-              FlightDeals
+              LAFareDrop
             </a>
           </div>
 

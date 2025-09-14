@@ -75,14 +75,14 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
           <div className="text-center">
             {/* Secret Deals Headline */}
-            <div className="inline-flex items-center bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
-              🔒 Secret Flight Deals from Los Angeles
-            </div>
-            
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              The Hidden Deals Airlines
-              <span className="block text-blue-600">Don't Want You to See</span>
-            </h1>
+                   <div className="inline-flex items-center bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                     🔒 Secret Flight Deals from Los Angeles
+                   </div>
+                   
+                   <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+                     LAFareDrop
+                     <span className="block text-blue-600">The Hidden Deals Airlines Don't Want You to See</span>
+                   </h1>
             
             {/* Above-Fold Value Proposition */}
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">

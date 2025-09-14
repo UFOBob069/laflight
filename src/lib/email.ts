@@ -14,6 +14,14 @@ function getResendClient() {
 }
 
 export async function sendDigestEmail({ to, deals, isPaid = false }: { to: string; deals: any[]; isPaid?: boolean }) {
+  console.log(`📧 Sending email to ${to}, isPaid: ${isPaid}, total deals: ${deals.length}`);
+  console.log('📧 First 3 deals for email:', deals.slice(0, 3).map(d => ({
+    origin: d.origin,
+    destination: d.destination,
+    price: d.price,
+    discount: d.discount
+  })));
+  
   const displayDeals = isPaid ? deals : deals.slice(0, 5); // Free users get top 5 deals
   const totalDeals = deals.length;
   
@@ -23,7 +31,7 @@ export async function sendDigestEmail({ to, deals, isPaid = false }: { to: strin
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Best LAX Deals - Weekly Flight Deals</title>
+    <title>LAFareDrop - Weekly Flight Deals</title>
     <meta name="description" content="Weekly digest of the best flight deals from Los Angeles">
   </head>
   <body style="margin:0;padding:0;background-color:#f8fafc;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif">
@@ -31,9 +39,9 @@ export async function sendDigestEmail({ to, deals, isPaid = false }: { to: strin
       
       <!-- Header -->
       <div style="background:linear-gradient(135deg,#3b82f6 0%,#1d4ed8 100%);padding:30px 20px;text-align:center">
-        <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:700;text-shadow:0 2px 4px rgba(0,0,0,0.1)">
-          ✈️ Best LAX Deals
-        </h1>
+             <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:700;text-shadow:0 2px 4px rgba(0,0,0,0.1)">
+               ✈️ LAFareDrop
+             </h1>
         <p style="color:#e0e7ff;margin:8px 0 0 0;font-size:16px;font-weight:500">
           ${isPaid ? 'Best Flight Deals' : 'Biggest Discounts'} • Last 7 Days • ${displayDeals.length}${isPaid ? '' : ` of ${totalDeals}`} deals found
         </p>
@@ -44,10 +52,10 @@ export async function sendDigestEmail({ to, deals, isPaid = false }: { to: strin
         <h2 style="color:#1f2937;margin:0 0 15px 0;font-size:20px;font-weight:600">
           Your Weekly Flight Deals Digest
         </h2>
-        <p style="color:#4b5563;margin:0 0 15px 0;font-size:15px;line-height:1.6">
-          Best LAX Deals monitors 50+ flight deal sources 24/7 to bring you the lowest prices from Los Angeles. 
-          We find deals that save you $30-179 per year compared to competitors.
-        </p>
+             <p style="color:#4b5563;margin:0 0 15px 0;font-size:15px;line-height:1.6">
+               LAFareDrop monitors 50+ flight deal sources 24/7 to bring you the lowest prices from Los Angeles. 
+               We find deals that save you $30-179 per year compared to competitors.
+             </p>
         <div style="text-align:center;margin-top:20px">
           <a href="${process.env.SITE_URL}/deals" style="background:#3b82f6;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;display:inline-block">
             View All Deals & Sort →
@@ -135,12 +143,12 @@ export async function sendDigestEmail({ to, deals, isPaid = false }: { to: strin
       
       <!-- Footer -->
       <div style="background:#f8fafc;padding:20px;text-align:center;border-top:1px solid #e5e7eb">
-        <p style="color:#6b7280;margin:0;font-size:14px;font-weight:500">
-          Powered by <strong>Best LAX Deals</strong> • 
-          <a href="${process.env.SITE_URL}/unsubscribe?email=${encodeURIComponent(to)}" style="color:#6b7280;text-decoration:underline">
-            Unsubscribe
-          </a>
-        </p>
+             <p style="color:#6b7280;margin:0;font-size:14px;font-weight:500">
+               Powered by <strong>LAFareDrop</strong> • 
+               <a href="${process.env.SITE_URL}/unsubscribe?email=${encodeURIComponent(to)}" style="color:#6b7280;text-decoration:underline">
+                 Unsubscribe
+               </a>
+             </p>
       </div>
       
     </div>
@@ -152,10 +160,10 @@ export async function sendDigestEmail({ to, deals, isPaid = false }: { to: strin
     from: process.env.EMAIL_FROM!,
     to,
     reply_to: process.env.EMAIL_REPLY_TO || process.env.EMAIL_FROM!,
-    subject: `Best LAX Deals: ${displayDeals.length}${isPaid ? '' : ` of ${totalDeals}`} flight deals this week`,
+    subject: `LAFareDrop: ${displayDeals.length}${isPaid ? '' : ` of ${totalDeals}`} flight deals this week`,
     html,
     headers: {
-      'X-Mailer': 'Best LAX Deals',
+      'X-Mailer': 'LAFareDrop',
       'X-Priority': '3',
       'X-MSMail-Priority': 'Normal',
       'Importance': 'Normal',
@@ -182,7 +190,7 @@ export async function sendWelcomeEmail(email: string) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Best LAX Deals!</title>
+    <title>Welcome to LAFareDrop!</title>
   </head>
   <body style="margin:0;padding:0;background-color:#f8fafc;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif">
     <div style="max-width:600px;margin:0 auto;background-color:#ffffff;box-shadow:0 4px 6px rgba(0,0,0,0.1)">
@@ -190,7 +198,7 @@ export async function sendWelcomeEmail(email: string) {
       <!-- Header -->
       <div style="background:linear-gradient(135deg,#3b82f6 0%,#1d4ed8 100%);padding:40px 20px;text-align:center">
         <h1 style="color:#ffffff;margin:0;font-size:32px;font-weight:700;text-shadow:0 2px 4px rgba(0,0,0,0.1)">
-          🎉 Welcome to Best LAX Deals!
+          🎉 Welcome to LAFareDrop!
         </h1>
         <p style="color:#e0e7ff;margin:12px 0 0 0;font-size:18px;font-weight:500">
           Your journey to incredible flight deals starts now
@@ -288,7 +296,7 @@ export async function sendWelcomeEmail(email: string) {
       <!-- Footer -->
       <div style="background:#f8fafc;padding:20px;text-align:center;border-top:1px solid #e5e7eb">
         <p style="color:#6b7280;margin:0;font-size:14px;font-weight:500">
-          Powered by <strong>Best LAX Deals</strong> • 
+          Powered by <strong>LAFareDrop</strong> • 
           <a href="${process.env.SITE_URL}/unsubscribe?email=${encodeURIComponent(email)}" style="color:#6b7280;text-decoration:underline">
             Unsubscribe
           </a>
@@ -304,10 +312,10 @@ export async function sendWelcomeEmail(email: string) {
     from: process.env.EMAIL_FROM!,
     to: email,
     reply_to: process.env.EMAIL_REPLY_TO || process.env.EMAIL_FROM!,
-    subject: 'Welcome to Best LAX Deals - Your weekly flight deals are ready',
+    subject: 'Welcome to LAFareDrop - Your weekly flight deals are ready',
     html,
     headers: {
-      'X-Mailer': 'Best LAX Deals',
+      'X-Mailer': 'LAFareDrop',
       'X-Priority': '3',
       'X-MSMail-Priority': 'Normal',
       'Importance': 'Normal',

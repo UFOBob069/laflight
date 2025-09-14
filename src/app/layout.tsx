@@ -5,10 +5,10 @@ import Navigation from "@/components/Navigation";
 
 export const metadata: Metadata = {
   title: {
-    default: "Best LAX Deals - Find Cheap Flights from Los Angeles | Save $30-179 per Year",
-    template: "%s | Best LAX Deals"
+    default: "LAFareDrop - Find Cheap Flights from Los Angeles | Save $30-179 per Year",
+    template: "%s | LAFareDrop"
   },
-  description: "Best LAX Deals monitors 50+ flight deal sources 24/7 to find the lowest prices from Los Angeles. Get weekly flight deals, direct booking links, and save $30-179 per year compared to competitors. Premium features include international destinations, sorting, and price alerts.",
+  description: "LAFareDrop monitors 50+ flight deal sources 24/7 to find the lowest prices from Los Angeles. Get weekly flight deals, direct booking links, and save $30-179 per year compared to competitors. Premium features include international destinations, sorting, and price alerts.",
   keywords: [
     "cheap flights from LAX",
     "Los Angeles flight deals",
@@ -26,15 +26,15 @@ export const metadata: Metadata = {
     "weekly flight deals",
     "flight deals email"
   ],
-  authors: [{ name: "Best LAX Deals" }],
-  creator: "Best LAX Deals",
-  publisher: "Best LAX Deals",
+  authors: [{ name: "LAFareDrop" }],
+  creator: "LAFareDrop",
+  publisher: "LAFareDrop",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.SITE_URL || 'https://www.bestlaxdeals.com'),
+  metadataBase: new URL(process.env.SITE_URL || 'https://www.lafaredrop.com'),
   alternates: {
     canonical: '/',
   },
@@ -42,24 +42,24 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    siteName: 'Best LAX Deals',
-    title: 'Best LAX Deals - Find Cheap Flights from Los Angeles',
+    siteName: 'LAFareDrop',
+    title: 'LAFareDrop - Find Cheap Flights from Los Angeles',
     description: 'Monitor 50+ flight deal sources 24/7 to find the lowest prices from Los Angeles. Save $30-179 per year with our weekly flight deals and premium features.',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Best LAX Deals - Cheap Flights from Los Angeles',
+        alt: 'LAFareDrop - Cheap Flights from Los Angeles',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Best LAX Deals - Find Cheap Flights from Los Angeles',
+    title: 'LAFareDrop - Find Cheap Flights from Los Angeles',
     description: 'Monitor 50+ flight deal sources 24/7 to find the lowest prices from Los Angeles. Save $30-179 per year with our weekly flight deals.',
     images: ['/twitter-image.jpg'],
-    creator: '@bestlaxdeals',
+    creator: '@lafaredrop',
   },
   robots: {
     index: true,
@@ -82,7 +82,7 @@ export const metadata: Metadata = {
   other: {
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
-    'apple-mobile-web-app-title': 'Best LAX Deals',
+    'apple-mobile-web-app-title': 'LAFareDrop',
     'mobile-web-app-capable': 'yes',
     'theme-color': '#3b82f6',
     'msapplication-TileColor': '#3b82f6',

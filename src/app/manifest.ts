@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Best LAX Deals - Find Cheap Flights from Los Angeles',
-    short_name: 'Best LAX Deals',
+    name: 'LAFareDrop - Find Cheap Flights from Los Angeles',
+    short_name: 'LAFareDrop',
     description: 'Monitor 50+ flight deal sources 24/7 to find the lowest prices from Los Angeles. Save $30-179 per year with our weekly flight deals.',
     start_url: '/',
     display: 'standalone',
