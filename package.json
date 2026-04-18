@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "setup-oauth": "node scripts/setup-oauth.js",
     "oauth-manual": "node scripts/manual-oauth.js",
-    "oauth-simple": "node scripts/simple-oauth.js"
+    "oauth-simple": "node scripts/simple-oauth.js",
+    "verify:gmail-oauth": "node scripts/verify-gmail-oauth.js",
+    "oauth-playground-guide": "node scripts/oauth-playground-guide.js"
   },
   "dependencies": {
     "@stripe/stripe-js": "^7.9.0",

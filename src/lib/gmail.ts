@@ -4,12 +4,19 @@ import dayjs from 'dayjs';
 export async function fetchRecentDealEmails({ label, days = 7 }:{
   label: string; days?: number;
 }) {
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN?.trim();
+  if (!refreshToken) {
+    throw new Error(
+      'GOOGLE_REFRESH_TOKEN is missing or empty. Run `npm run oauth-simple`, paste the token into .env, restart the dev server, and try again.'
+    );
+  }
+
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID!,
     process.env.GOOGLE_CLIENT_SECRET!,
     process.env.GOOGLE_REDIRECT_URI!
   );
-  oauth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN! });
+  oauth2Client.setCredentials({ refresh_token: refreshToken });
 
   const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
   const q = `label:${JSON.stringify(label)} newer_than:${days}d`;

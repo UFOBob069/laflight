@@ -5,10 +5,36 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [progress, setProgress] = useState({ status: '', progress: 0, total: 0, completed: false });
+  const [progress, setProgress] = useState({
+    status: '',
+    progress: 0,
+    total: 0,
+    completed: false,
+    error: false,
+    details: '',
+  });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState('');
   const { user, loading: authLoading } = useAuth();
+
+  const getErrorMessage = async (response: Response) => {
+    const raw = await response.text();
+
+    if (response.status === 401) {
+      return 'Unauthorized (401). Ensure NEXT_PUBLIC_CRON_SECRET exactly matches CRON_SECRET.';
+    }
+
+    if (!raw) {
+      return `HTTP ${response.status}`;
+    }
+
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed.error || parsed.details || parsed.message || raw;
+    } catch {
+      return raw;
+    }
+  };
 
   // List of admin email addresses
   const adminEmails = [
@@ -89,7 +115,7 @@ export default function AdminPage() {
 
   const call = async (action: string) => {
     setIsLoading(true);
-    setProgress({ status: 'Starting...', progress: 0, total: 0, completed: false });
+    setProgress({ status: 'Starting...', progress: 0, total: 0, completed: false, error: false, details: '' });
 
     try {
       if (action === 'ingest') {
@@ -101,7 +127,8 @@ export default function AdminPage() {
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const message = await getErrorMessage(response);
+          throw new Error(message);
         }
 
         const reader = response.body?.getReader();
@@ -119,7 +146,7 @@ export default function AdminPage() {
               if (line.startsWith('data: ')) {
                 try {
                   const data = JSON.parse(line.slice(6));
-                  setProgress(data);
+                  setProgress((prev) => ({ ...prev, ...data }));
                   if (data.completed) {
                     setIsLoading(false);
                     return;
@@ -140,7 +167,8 @@ export default function AdminPage() {
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const message = await getErrorMessage(response);
+          throw new Error(message);
         }
 
         const result = await response.json();
@@ -148,7 +176,9 @@ export default function AdminPage() {
           status: result.message || 'Digest sent successfully!', 
           progress: 1, 
           total: 1, 
-          completed: true 
+          completed: true,
+          error: false,
+          details: '',
         });
       }
     } catch (error) {
@@ -156,7 +186,9 @@ export default function AdminPage() {
         status: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`, 
         progress: 0, 
         total: 0, 
-        completed: true 
+        completed: true,
+        error: true,
+        details: error instanceof Error ? error.message : 'Unknown error',
       });
     } finally {
       setIsLoading(false);
@@ -253,8 +285,11 @@ export default function AdminPage() {
       )}
 
       {progress.completed && !isLoading && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-green-800">{progress.status}</p>
+        <div className={`rounded-lg p-4 border ${progress.error ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+          <p className={progress.error ? 'text-red-800' : 'text-green-800'}>{progress.status}</p>
+          {progress.error && progress.details && (
+            <p className="text-red-700 text-sm mt-1">{progress.details}</p>
+          )}
         </div>
       )}
     </main>

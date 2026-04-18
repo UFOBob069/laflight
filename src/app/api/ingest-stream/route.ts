@@ -2,10 +2,10 @@ import { NextRequest } from 'next/server';
 import { fetchRecentDealEmails } from '@/lib/gmail';
 import { parseDealEmail } from '@/lib/parse';
 import { saveDeals } from '@/lib/store';
+import { isAuthorizedCronRequest } from '@/lib/cronAuth';
 
 export async function POST(req: NextRequest) {
-  const secret = req.headers.get('x-cron-secret');
-  if (process.env.CRON_SECRET && secret !== process.env.CRON_SECRET) {
+  if (!isAuthorizedCronRequest(req)) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -96,9 +96,12 @@ export async function POST(req: NextRequest) {
         
         controller.close();
       } catch (error) {
+        console.error('❌ Ingest stream error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         sendUpdate({ 
-          status: 'Error occurred', 
-          error: error instanceof Error ? error.message : 'Unknown error',
+          status: `Error occurred: ${errorMessage}`,
+          error: true,
+          details: errorMessage,
           completed: true
         });
         controller.close();
