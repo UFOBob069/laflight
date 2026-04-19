@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { isAdminEmail } from '@/config/admin';
 
 export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +22,7 @@ export default function AdminPage() {
     const raw = await response.text();
 
     if (response.status === 401) {
-      return 'Unauthorized (401). Ensure NEXT_PUBLIC_CRON_SECRET exactly matches CRON_SECRET.';
+      return 'Unauthorized (401). If you use the admin trigger API, sign in again. Otherwise ensure CRON_SECRET matches for cron jobs.';
     }
 
     if (!raw) {
@@ -36,17 +37,11 @@ export default function AdminPage() {
     }
   };
 
-  // List of admin email addresses
-  const adminEmails = [
-    'david.eagan@gmail.com', // Admin email
-    'admin@bestlaxdeals.com', // Add any other admin emails
-  ];
-
   useEffect(() => {
-    if (user && adminEmails.includes(user.email || '')) {
+    if (user && isAdminEmail(user.email)) {
       setIsAuthenticated(true);
       setAuthError('');
-    } else if (user && !adminEmails.includes(user.email || '')) {
+    } else if (user && !isAdminEmail(user.email)) {
       setAuthError('Access denied. This email is not authorized for admin access.');
     }
   }, [user]);
@@ -118,12 +113,21 @@ export default function AdminPage() {
     setProgress({ status: 'Starting...', progress: 0, total: 0, completed: false, error: false, details: '' });
 
     try {
+      const idToken = await user?.getIdToken();
+      if (!idToken) {
+        throw new Error('Not signed in. Refresh the page and sign in again.');
+      }
+
       if (action === 'ingest') {
-        const response = await fetch('/api/ingest-stream', {
+        setProgress((p) => ({ ...p, status: 'Running ingest (this can take a minute)...', progress: 0, total: 1 }));
+
+        const response = await fetch('/api/admin/trigger', {
           method: 'POST',
           headers: {
-            'x-cron-secret': process.env.NEXT_PUBLIC_CRON_SECRET || '',
+            Authorization: `Bearer ${idToken}`,
+            'Content-Type': 'application/json',
           },
+          body: JSON.stringify({ action: 'ingest' }),
         });
 
         if (!response.ok) {
@@ -131,39 +135,26 @@ export default function AdminPage() {
           throw new Error(message);
         }
 
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
+        const result = await response.json();
+        setProgress({
+          status: result.message || `Ingested ${result.ingestedCount ?? 0} deals from ${result.processedEmails ?? 0} emails`,
+          progress: 1,
+          total: 1,
+          completed: true,
+          error: false,
+          details: '',
+        });
+        return;
+      }
 
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
-
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                try {
-                  const data = JSON.parse(line.slice(6));
-                  setProgress((prev) => ({ ...prev, ...data }));
-                  if (data.completed) {
-                    setIsLoading(false);
-                    return;
-                  }
-                } catch (e) {
-                  console.error('Error parsing SSE data:', e);
-                }
-              }
-            }
-          }
-        }
-      } else if (action === 'digest') {
-        const response = await fetch('/api/digest', {
+      if (action === 'digest') {
+        const response = await fetch('/api/admin/trigger', {
           method: 'POST',
           headers: {
-            'x-cron-secret': process.env.NEXT_PUBLIC_CRON_SECRET || '',
+            Authorization: `Bearer ${idToken}`,
+            'Content-Type': 'application/json',
           },
+          body: JSON.stringify({ action: 'digest' }),
         });
 
         if (!response.ok) {
