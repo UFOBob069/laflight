@@ -3,11 +3,8 @@ import { getTopDeals } from '@/lib/store';
 import { sendDigestEmail } from '@/lib/email';
 import { getFirestoreDB } from '@/lib/firebaseAdmin';
 import { isAuthorizedCronRequest } from '@/lib/cronAuth';
-import { shouldRunChicagoCronHour } from '@/lib/chicagoCronGate';
 
-/** Vercel Cron uses GET; admin uses POST. Only GET is limited to 2 AM local. */
-const CHICAGO_DIGEST_HOUR = 2;
-
+/** Vercel Cron uses GET; admin uses POST. Cron time is controlled in vercel.json (UTC). */
 async function runDigest(req: NextRequest) {
   const { to } = await req.json().catch(() => ({}));
 
@@ -92,14 +89,6 @@ async function runDigest(req: NextRequest) {
 export async function GET(req: NextRequest) {
   if (!isAuthorizedCronRequest(req)) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-  }
-
-  const gate = shouldRunChicagoCronHour(CHICAGO_DIGEST_HOUR);
-  if (!gate.run) {
-    return NextResponse.json({
-      skipped: true,
-      reason: `Not ${CHICAGO_DIGEST_HOUR}:00 in ${gate.timezone} (now ${gate.localTime})`,
-    });
   }
 
   try {

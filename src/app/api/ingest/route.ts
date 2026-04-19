@@ -3,11 +3,8 @@ import { fetchRecentDealEmails } from '@/lib/gmail';
 import { parseDealEmail } from '@/lib/parse';
 import { saveDeals } from '@/lib/store';
 import { isAuthorizedCronRequest } from '@/lib/cronAuth';
-import { shouldRunChicagoCronHour } from '@/lib/chicagoCronGate';
 
-/** Vercel Cron uses GET; admin / scripts use POST. Only GET is limited to 1 AM local. */
-const CHICAGO_INGEST_HOUR = 1;
-
+/** Vercel Cron uses GET; admin uses POST. Cron time is controlled in vercel.json (UTC). */
 async function runIngest() {
   console.log('Starting email fetch...');
   const raw = await fetchRecentDealEmails({
@@ -51,14 +48,6 @@ async function runIngest() {
 export async function GET(req: NextRequest) {
   if (!isAuthorizedCronRequest(req)) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
-  }
-
-  const gate = shouldRunChicagoCronHour(CHICAGO_INGEST_HOUR);
-  if (!gate.run) {
-    return NextResponse.json({
-      skipped: true,
-      reason: `Not ${CHICAGO_INGEST_HOUR}:00 in ${gate.timezone} (now ${gate.localTime})`,
-    });
   }
 
   try {
